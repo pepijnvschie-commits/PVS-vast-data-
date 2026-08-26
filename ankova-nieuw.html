@@ -89,8 +89,22 @@ section[id],header[id]{scroll-margin-top:96px;}
 /* ---------- Nav (zwevende glazen pill) ---------- */
 nav{position:fixed;top:14px;left:0;right:0;z-index:100;pointer-events:none;transition:top .3s var(--ease);}
 nav .container{max-width:1080px;}
-.nav-inner{pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:18px;height:60px;padding:0 12px 0 20px;background:rgba(255,255,255,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);border-radius:16px;box-shadow:0 2px 8px rgba(15,34,51,.06),0 12px 32px rgba(15,34,51,.08);transition:background .3s,box-shadow .3s;}
-nav.scrolled .nav-inner{background:rgba(255,255,255,.9);box-shadow:0 4px 12px rgba(15,34,51,.08),0 18px 44px rgba(15,34,51,.12);}
+/* Boven de fotohero staat de pill in donker glas met witte tekst; zodra u
+   scrolt (nav.scrolled) wisselt hij naar wit glas met donkere tekst. */
+.nav-inner{pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:18px;height:60px;padding:0 12px 0 20px;background:rgba(12,25,38,.42);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.18);border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.18);transition:background .3s,box-shadow .3s,border-color .3s;}
+nav.scrolled .nav-inner{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.6);box-shadow:0 4px 12px rgba(15,34,51,.08),0 18px 44px rgba(15,34,51,.12);}
+/* Kleuren binnen de pill in donkere stand */
+nav:not(.scrolled) .logo{color:#fff;}
+nav:not(.scrolled) .logo-mark path{fill:#fff;}
+nav:not(.scrolled) .nav-links{color:rgba(255,255,255,.75);}
+nav:not(.scrolled) .nav-links a:hover,nav:not(.scrolled) .nav-links a.active{color:#fff;}
+nav:not(.scrolled) .nav-cta .btn-ghost{border-color:rgba(255,255,255,.45);color:#fff;}
+nav:not(.scrolled) .nav-cta .btn-ghost:hover{border-color:#fff;color:#fff;}
+nav:not(.scrolled) .nav-cta .btn-primary{background:#fff;color:var(--ink);}
+nav:not(.scrolled) .nav-cta .btn-primary:hover{background:#fff;color:var(--ink);}
+nav:not(.scrolled) .nav-burger,nav:not(.scrolled) .nav-login-icon{border-color:rgba(255,255,255,.4);color:#fff;}
+nav:not(.scrolled) .nav-burger span,nav:not(.scrolled) .nav-burger span::before,nav:not(.scrolled) .nav-burger span::after{background:#fff;}
+nav:not(.scrolled) .nav-burger.open span{background:transparent;}
 .logo{font-family:var(--disp);font-size:22px;font-weight:400;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--ink);}
 .logo-mark{width:24px;height:24px;flex-shrink:0;}
 .logo-mark path{fill:var(--ink);}
@@ -130,33 +144,34 @@ nav.scrolled .nav-inner{background:rgba(255,255,255,.9);box-shadow:0 4px 12px rg
 .nav-cta .btn-ghost{background:transparent;border-color:rgba(22,50,74,.2);color:var(--ink);}
 .nav-cta .btn-ghost:hover{border-color:var(--brass-deep);color:var(--brass-deep);}
 
-/* ---------- HERO (full-screen, video-achtergrond) ---------- */
-.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--ink);overflow:hidden;padding:120px 0 150px;}
-.hero-bg{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,#F2F8FE,var(--paper));}
-/* ---- HERO-VIDEO (makkelijk aan te passen) ----
-   Vervang de src van de <video> in de HTML hieronder door uw eigen video,
-   of verwijder het video-element om alleen de rustige gradient te tonen.
-   De overlay hieronder houdt de tekst altijd leesbaar. ---- */
-.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;opacity:0;transition:opacity 1.8s var(--ease);}
-.hero-video.on{opacity:1;}
-.hero-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(247,250,253,.88) 0%,rgba(247,250,253,.5) 42%,rgba(247,250,253,.72) 75%,rgba(247,250,253,.96) 100%);}
-.hero-bg::before{content:'';position:absolute;inset:0;
-  background-image:linear-gradient(rgba(59,130,196,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,196,.06) 1px,transparent 1px);
-  background-size:42px 42px;
-  mask-image:radial-gradient(70% 60% at 50% 40%,#000 0%,transparent 100%);-webkit-mask-image:radial-gradient(70% 60% at 50% 40%,#000 0%,transparent 100%);}
-.hero-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(760px 480px at 50% 0%,rgba(127,178,230,.22),transparent 60%);}
-.hero-inner{position:relative;z-index:2;max-width:880px;padding:0 26px;display:flex;flex-direction:column;align-items:center;}
-.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:var(--ink);background:rgba(255,255,255,.7);backdrop-filter:blur(6px);border:1px solid rgba(22,50,74,.1);border-radius:100px;padding:8px 18px;margin-bottom:30px;}
-.hero-eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 5px rgba(59,130,196,.2);animation:pulse 2.4s infinite;}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 5px rgba(59,130,196,.2);}50%{box-shadow:0 0 0 9px rgba(59,130,196,.07);}}
-.hero h1{font-size:clamp(48px,7.4vw,96px);line-height:.98;letter-spacing:-2px;font-weight:400;margin-bottom:26px;}
-.hero h1 em{font-style:italic;color:var(--brass-deep);}
+/* ---------- HERO (full-screen, crossfadende foto's) ----------
+   De drie foto's wisselen elkaar zacht af (crossfade) en zijn ook met de
+   knoppen onderin te kiezen. Vervang de bestanden in assets/foto/ door uw
+   eigen foto's — zie assets/foto/LEESMIJ.md. Laadt een foto niet, dan
+   blijft de donkerblauwe achtergrond staan en blijft alles leesbaar. */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;overflow:hidden;padding:104px 0 140px;background:var(--ink-4);}
+.hero-media{position:absolute;inset:0;z-index:0;}
+.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease-in-out,transform 9s linear;transform:scale(1.06);}
+.hero-slide.on{opacity:1;transform:scale(1);}
+.hero-scrim{position:absolute;inset:0;z-index:1;background:
+  linear-gradient(180deg,rgba(10,22,34,.72) 0%,rgba(10,22,34,.45) 38%,rgba(10,22,34,.62) 72%,rgba(10,22,34,.92) 100%),
+  radial-gradient(80% 60% at 50% 45%,rgba(10,22,34,.15),rgba(10,22,34,.6));}
+.hero-inner{position:relative;z-index:2;max-width:900px;padding:0 26px;display:flex;flex-direction:column;align-items:center;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:#fff;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:100px;padding:8px 18px;margin-bottom:24px;}
+.hero-eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 5px rgba(59,130,196,.3);animation:pulse 2.4s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 5px rgba(59,130,196,.3);}50%{box-shadow:0 0 0 9px rgba(59,130,196,.1);}}
+.hero h1{font-size:clamp(48px,7.4vw,96px);line-height:.98;letter-spacing:-2px;font-weight:400;color:#fff;margin-bottom:20px;text-shadow:0 2px 30px rgba(8,15,22,.45);}
+.hero h1 em{font-style:italic;color:#8FC4F2;}
 .h-line{display:block;overflow:hidden;padding-bottom:.24em;margin-bottom:-.24em;}
 .h-line>span{display:block;transform:translateY(112%);}
-.hero p{font-size:clamp(15px,1.6vw,18px);color:var(--muted);max-width:620px;margin:0 auto 36px;}
-.hero-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:38px;}
-.hero-meta{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--muted);}
-.hero-meta b{color:var(--ink);font-weight:600;}
+.hero p{font-size:clamp(15px,1.6vw,18px);color:rgba(255,255,255,.82);max-width:620px;margin:0 auto 28px;}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:28px;}
+.hero-actions .btn-primary{background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.28);}
+.hero-actions .btn-primary:hover{background:#fff;color:var(--ink);box-shadow:0 8px 22px rgba(0,0,0,.34);}
+.hero-actions .btn-ghost{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.45);color:#fff;}
+.hero-actions .btn-ghost:hover{background:rgba(255,255,255,.18);border-color:#fff;}
+.hero-meta{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;font-size:13px;color:rgba(255,255,255,.72);}
+.hero-meta b{color:#fff;font-weight:600;}
 .entrance .hero-eyebrow{opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
 .entrance .hero-actions,.entrance .hero-meta{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
 .entrance .hero p{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
@@ -167,37 +182,39 @@ body.ready .entrance .hero p{opacity:1;transform:none;transition-delay:.3s;}
 body.ready .entrance .hero-actions{opacity:1;transform:none;transition-delay:.45s;}
 body.ready .entrance .hero-meta{opacity:1;transform:none;transition-delay:.6s;}
 
-/* stat-kaart (glas) — gecentreerd onder de hero-content; op brede schermen
-   als horizontale rij van drie cijfers */
-.hero-card{margin-top:38px;width:min(760px,100%);background:rgba(255,255,255,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.7);border-radius:18px;padding:8px 26px;color:var(--ink);box-shadow:var(--sh-2);text-align:left;display:flex;justify-content:space-between;gap:0;}
-.hero-card .row{flex:1;display:flex;flex-direction:column-reverse;align-items:center;justify-content:center;gap:4px;text-align:center;padding:16px 12px;border-left:1px solid var(--line);font-size:14px;}
+/* stat-kaart (donker glas op de foto) — horizontale rij van drie cijfers */
+.hero-card{margin-top:26px;width:min(760px,100%);background:rgba(255,255,255,.1);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:8px 26px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.3);text-align:left;display:flex;justify-content:space-between;gap:0;}
+.hero-card .row{flex:1;display:flex;flex-direction:column-reverse;align-items:center;justify-content:center;gap:4px;text-align:center;padding:16px 12px;border-left:1px solid rgba(255,255,255,.18);font-size:14px;}
 .hero-card .row:first-child{border-left:none;}
-.hero-card .lbl{color:var(--muted);font-size:12px;}
-.hero-card .val{font-family:var(--mono);font-weight:600;font-size:22px;color:var(--brass-deep);}
+.hero-card .lbl{color:rgba(255,255,255,.7);font-size:12px;}
+.hero-card .val{font-family:var(--mono);font-weight:600;font-size:22px;color:#fff;}
 @media(max-width:760px){
   .hero-card{flex-direction:column;padding:8px 22px;}
-  .hero-card .row{flex-direction:row;justify-content:space-between;text-align:left;padding:12px 0;border-left:none;border-top:1px solid var(--line);}
+  .hero-card .row{flex-direction:row;justify-content:space-between;text-align:left;padding:12px 0;border-left:none;border-top:1px solid rgba(255,255,255,.18);}
   .hero-card .row:first-child{border-top:none;}
   .hero-card .val{font-size:15px;}
 }
 .entrance-card{opacity:0;transform:translateY(20px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:.75s;}
 body.ready .entrance-card{opacity:1;transform:none;}
 
-/* onderste strip in de hero (status + tags) */
-.hero-foot{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:64px 26px 22px;background:linear-gradient(to top,rgba(247,250,253,.95) 0%,rgba(247,250,253,.6) 55%,transparent 100%);}
-.hero-foot-left{display:inline-flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);}
-.hero-foot-left .dot{width:8px;height:8px;border-radius:50%;background:var(--ink);}
-.hero-foot-tags{display:flex;flex-wrap:wrap;gap:8px;}
-.hero-foot-tags span{background:rgba(255,255,255,.85);border:1px solid rgba(22,50,74,.12);border-radius:100px;padding:6px 14px;font-size:11.5px;font-weight:500;color:rgba(22,50,74,.75);}
+/* onderste strip in de hero: fotokiezer links, status rechts */
+.hero-foot{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;max-width:1180px;margin:0 auto;padding:34px 26px 24px;}
+.hero-switch{display:flex;flex-direction:column;gap:8px;text-align:left;}
+.hero-switch button{display:flex;align-items:baseline;gap:10px;background:none;color:#fff;font-family:var(--body);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;opacity:.55;padding:2px 0;transition:opacity .2s var(--ease),transform .2s var(--ease);}
+.hero-switch button:hover{opacity:.8;transform:translateX(4px);}
+.hero-switch button.on{opacity:1;}
+.hero-switch button i{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;opacity:.75;}
+.hero-status{display:inline-flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.85);}
+.hero-status .dot{width:7px;height:7px;border-radius:50%;background:#8FC4F2;box-shadow:0 0 12px 2px rgba(143,196,242,.75);animation:dotPulse 1.6s infinite;}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.45;transform:scale(1.45);}}
 .entrance-foot{opacity:0;transform:translateY(16px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:.9s;}
 body.ready .entrance-foot{opacity:1;transform:none;}
 @media(max-width:760px){
-  .hero{padding:110px 0 40px;min-height:100svh;}
+  .hero{padding:120px 0 40px;min-height:100svh;}
   /* De drie losse vertrouwens-regels lezen op mobiel als losse weetjes;
      de statistiekenkaart maakt het verhaal al concreet. */
   .hero-meta{display:none;}
-  .hero-foot{position:static;padding:34px 26px 0;background:none;justify-content:center;}
-  .hero-foot-left{display:none;}
+  .hero-foot{position:static;padding:34px 26px 0;flex-direction:column;align-items:flex-start;gap:18px;}
 }
 
 /* ---------- Marquee (licht lint) ---------- */
@@ -437,15 +454,16 @@ footer a:hover{color:var(--brass);}
   </div>
 </nav>
 
-<!-- HERO (full-screen, gecentreerd, video-achtergrond) -->
+<!-- HERO (full-screen, crossfadende foto's) -->
 <header class="hero" id="top">
-  <div class="hero-bg"></div>
-  <!-- HERO-VIDEO: vervang de src door uw eigen (rustige) achtergrondvideo,
-       of verwijder dit element om alleen de gradient-achtergrond te tonen.
-       De pagina blijft er ook zonder video verzorgd uitzien. -->
-  <video class="hero-video" id="heroVideo" autoplay muted loop playsinline
-    src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260714_113715_c7e0daa0-8bdd-4486-a2da-040901f8f0ea.mp4"></video>
-  <div class="hero-overlay"></div>
+  <!-- HERO-FOTO'S: vervang de drie bestanden hieronder door uw eigen foto's.
+       Zie assets/foto/LEESMIJ.md voor de bestandsnamen en het formaat. -->
+  <div class="hero-media" aria-hidden="true">
+    <div class="hero-slide on" style="background-image:url('assets/foto/hero-1.svg')"></div>
+    <div class="hero-slide" style="background-image:url('assets/foto/hero-2.svg')"></div>
+    <div class="hero-slide" style="background-image:url('assets/foto/hero-3.svg')"></div>
+  </div>
+  <div class="hero-scrim"></div>
   <div class="hero-inner entrance">
     <div class="hero-eyebrow"><span class="dot"></span>Portaal voor verhuurders &amp; beheerders</div>
     <h1><span class="h-line"><span>Vastgoedbeheer</span></span><span class="h-line"><span>dat <em>zichzelf regelt.</em></span></span></h1>
@@ -466,8 +484,12 @@ footer a:hover{color:var(--brass);}
     </div>
   </div>
   <div class="hero-foot entrance-foot">
-    <div class="hero-foot-left"><span class="dot"></span>14 dagen gratis uitproberen — maandelijks opzegbaar</div>
-    <div class="hero-foot-tags"><span>Panden</span><span>Huurders</span><span>Onderhoud</span><span>Boekhouding</span><span>AI-assistent</span></div>
+    <div class="hero-switch" id="heroSwitch" role="group" aria-label="Kies een achtergrondfoto">
+      <button type="button" class="on" onclick="kiesSlide(0)"><i>01 /</i>Grachtenpanden</button>
+      <button type="button" onclick="kiesSlide(1)"><i>02 /</i>Stadsstraat</button>
+      <button type="button" onclick="kiesSlide(2)"><i>03 /</i>Kantoortorens</button>
+    </div>
+    <div class="hero-status"><span class="dot"></span>14 dagen gratis uitproberen — maandelijks opzegbaar</div>
   </div>
 </header>
 
@@ -505,7 +527,7 @@ footer a:hover{color:var(--brass);}
     </div>
     <div class="features">
       <div class="feature f-8 reveal"><div class="f-ico" style="background:var(--brass-soft)">🔧</div><h3>Meldingen &amp; onderhoud</h3><p>Huurders melden, de AI stuurt door naar de juiste vakman — met prijsindicatie, automatische mails en bezoekafspraken richting uw huurders. Preventief onderhoud per onderdeel (ketel, dak, schilderwerk) wordt automatisch bewaakt.</p></div>
-      <div class="photo-card f-4 reveal" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))"><span class="tag">Portefeuille</span><h3>Van wonen tot commercieel</h3><p>Elke vastgoedcategorie — in één portaal beheerd.</p></div>
+      <div class="photo-card f-4 reveal" style="background-image:url('assets/foto/portefeuille.svg')"><span class="tag">Portefeuille</span><h3>Van wonen tot commercieel</h3><p>Elke vastgoedcategorie — in één portaal beheerd.</p></div>
       <div class="feature f-4 dark reveal"><div class="f-ico" style="background:rgba(59,130,196,.2)">💶</div><h3>Huurbewaking</h3><p>Direct zien welke huur binnen is en welke niet.</p>
         <div class="feed">
           <div class="feed-row">✓ Keizersgracht 42 — betaald <span class="t">09:12</span></div>
@@ -513,7 +535,7 @@ footer a:hover{color:var(--brass);}
           <div class="feed-row" style="border-color:rgba(59,130,196,.6)">✦ Overtoom 302 — herinnering <span class="t">nu</span></div>
         </div>
       </div>
-      <div class="photo-card f-8 reveal" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))"><span class="tag">AI</span><h3>De AI regelt het onderhoud</h3><p>Melding → juiste vakman → prijsindicatie → afspraak → afronding. Zodra de vakman klaar is, krijgen u en uw huurder automatisch bericht dat de melding is opgelost.</p></div>
+      <div class="photo-card f-8 reveal" style="background-image:url('assets/foto/ai-onderhoud.svg')"><span class="tag">AI</span><h3>De AI regelt het onderhoud</h3><p>Melding → juiste vakman → prijsindicatie → afspraak → afronding. Zodra de vakman klaar is, krijgen u en uw huurder automatisch bericht dat de melding is opgelost.</p></div>
       <div class="feature f-4 reveal"><div class="f-ico" style="background:var(--brass-soft)">📊</div><h3>Rendement &amp; prognoses</h3><p>Bruto, netto en rendement op eigen vermogen per pand.</p>
         <div class="mini-bars"><i style="height:38%"></i><i style="height:52%"></i><i style="height:47%"></i><i style="height:66%"></i><i style="height:74%"></i><i style="height:88%"></i></div>
         <div class="f-kpi"><span class="count" data-count="6.1" data-dec="1">0,0</span>%<small>netto rendement portefeuille</small></div>
@@ -527,7 +549,7 @@ footer a:hover{color:var(--brass);}
 </section>
 
 <!-- PARALLAX-DELER -->
-<section class="parallax" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))">
+<section class="parallax" style="background-image:url('assets/foto/parallax.svg')">
   <div class="inner reveal">
     <div class="label">Van melding naar oplossing</div>
     <h2>Vakmensen worden <em>automatisch</em> ingeschakeld.</h2>
@@ -557,7 +579,7 @@ footer a:hover{color:var(--brass);}
 <!-- SPLIT (foto + tekst) -->
 <section class="section ivory" id="overzicht">
   <div class="container split">
-    <div class="split-media reveal left" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))"></div>
+    <div class="split-media reveal left" style="background-image:url('assets/foto/overzicht.svg')"></div>
     <div class="reveal right">
       <div class="sec-eyebrow"><span class="sec-nr">03</span>Overzicht op elk niveau</div>
       <h2 class="sec-title">Eén portaal. Elke relatie. Elk pand.</h2>
@@ -686,7 +708,7 @@ footer a:hover{color:var(--brass);}
 <!-- CONTACT -->
 <section class="section ivory" id="contact">
   <div class="container contact-grid">
-    <div class="contact-media reveal left" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))"></div>
+    <div class="contact-media reveal left" style="background-image:url('assets/foto/contact.svg')"></div>
     <div class="reveal right">
       <div class="sec-eyebrow"><span class="sec-nr">06</span>Contact</div>
       <h2 class="sec-title">Vragen? We denken graag mee.</h2>
@@ -786,16 +808,25 @@ footer a:hover{color:var(--brass);}
 const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!prefersReduced) document.body.classList.add('ready');
 
-// Hero-video zacht laten infaden zodra hij kan afspelen; laadt hij niet
-// (geen verbinding, verwijderde src), dan blijft de gradient netjes staan.
-(function(){
-  const v=document.getElementById('heroVideo');
-  if(!v) return;
-  if(prefersReduced){ v.removeAttribute('autoplay'); v.remove(); return; }
-  const aan=()=>v.classList.add('on');
-  if(v.readyState>=2) aan(); else v.addEventListener('canplay',aan,{once:true});
-  v.addEventListener('error',()=>{ v.remove(); },{once:true});
-})();
+// ===== Hero-fotowissel (crossfade) =====
+// De drie foto's wisselen elkaar vanzelf af; met de knoppen onderin kiest
+// de bezoeker er zelf een. Na een klik pauzeert het automatisch wisselen
+// even, zodat de gekozen foto blijft staan.
+const heroSlides=[...document.querySelectorAll('.hero-slide')];
+const heroKnoppen=[...document.querySelectorAll('#heroSwitch button')];
+let heroIndex=0, heroTimer=null;
+function toonSlide(i){
+  heroIndex=(i+heroSlides.length)%heroSlides.length;
+  heroSlides.forEach((s,n)=>s.classList.toggle('on',n===heroIndex));
+  heroKnoppen.forEach((b,n)=>b.classList.toggle('on',n===heroIndex));
+}
+function startHeroWissel(){
+  if(prefersReduced || heroSlides.length<2) return;
+  clearInterval(heroTimer);
+  heroTimer=setInterval(()=>toonSlide(heroIndex+1),6500);
+}
+function kiesSlide(i){ toonSlide(i); startHeroWissel(); }
+startHeroWissel();
 
 // Scroll-voortgang, nav, scrollspy, terug-naar-boven
 const nav=document.querySelector('nav');
