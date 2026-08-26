@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ankova — Vastgoedbeheer dat zichzelf regelt</title>
+<meta name="description" content="Ankova automatiseert vastgoedbeheer voor verhuurders en beheerders: panden, huurders, meldingen, onderhoud, documenten en boekhouding in één portaal — met AI die meekijkt.">
+<link rel="icon" href="assets/favicon.png">
+<meta property="og:title" content="Ankova — Vastgoedbeheer dat zichzelf regelt">
+<meta property="og:description" content="Panden, huurders, meldingen, onderhoud, documenten en boekhouding in één portaal — met AI die meekijkt.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nl_NL">
+<!-- Laadwaarschuwing: zie dezelfde toelichting in vastgoedos-platform.html —
+     het Supabase-script hieronder moet over internet opgehaald worden vóórdat
+     de rest van de pagina iets doet; dit vangt op als dat vastloopt. -->
+<script>
+(function(){
+  var overlay=null;
+  var timer=setTimeout(function(){
+    if(typeof window.supabase!=='undefined') return;
+    overlay=document.createElement('div');
+    overlay.id='pvsLaadWaarschuwing';
+    overlay.style.cssText='position:fixed;inset:0;background:#EAF1F8;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;font-family:sans-serif;text-align:center;color:#16324A';
+    overlay.innerHTML='<div style="max-width:340px"><div style="font-size:15px;font-weight:600;margin-bottom:8px">Kan niet volledig laden</div><div style="font-size:13px;line-height:1.6;color:#5A6B7C">Deze pagina heeft een goede internetverbinding nodig om te starten. Controleer uw verbinding en probeer opnieuw — of open deze pagina in een gewone browser (Chrome of Safari) in plaats van via een app zoals WhatsApp of e-mail.</div><button onclick="location.reload()" style="margin-top:14px;padding:9px 18px;border:none;border-radius:8px;background:#16324A;color:#fff;font-size:13px;cursor:pointer">Opnieuw proberen</button></div>';
+    (document.body||document.documentElement).appendChild(overlay);
+  }, 8000);
+  window.addEventListener('load', function(){
+    clearTimeout(timer);
+    if(overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  });
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ============================================================
+   PVS VAST — PREMIUM EDITION (Nederlands cinematisch ontwerp)
+   Richting: full-bleed fotografie van vastgoed & moderne bouw
+   Palet: lichtblauw papier, diepstaalblauwe ink, blauw als hoofdaccent,
+          licht hemelsblauw als tweede accent
+   Display: Fraunces · Body: Inter · Cijfers/maten: IBM Plex Mono
+   ============================================================ */
+:root{
+  --ink:#16324A; --ink-2:#1D3A54; --ink-3:#2A4A68; --ink-4:#0F2233;
+  --paper:#EAF1F8; --surface:#FBFDFE;
+  --brass:#3B82C4; --brass-deep:#2B6FB5; --brass-soft:#DCEBFA;
+  --clay:#5FA8C8; --clay-soft:#DCEFF6;
+  --line:#D6E2EF; --line-dark:rgba(255,255,255,.16);
+  --muted:#5A6B7C; --muted-dark:#AEBBC9;
+  --r:22px; --r-sm:12px;
+  --disp:'Fraunces',Georgia,serif; --body:'Inter',sans-serif; --mono:'IBM Plex Mono',monospace;
+  --sh-1:0 2px 6px rgba(15,34,51,.06),0 14px 34px rgba(15,34,51,.10);
+  --sh-2:0 4px 8px rgba(15,34,51,.08),0 32px 70px rgba(15,34,51,.18);
+  --ease:cubic-bezier(.22,.8,.28,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;overflow-x:hidden;}
+body{font-family:var(--body);background:var(--paper);color:var(--ink);line-height:1.65;font-size:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+.container{max-width:1180px;margin:0 auto;padding:0 26px;}
+h1,h2,h3{font-family:var(--disp);font-weight:500;letter-spacing:-.5px;}
+
+/* ---------- Voortgang & terug-naar-boven ---------- */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--brass),var(--clay));z-index:400;}
+#toTop{position:fixed;right:22px;bottom:22px;width:46px;height:46px;border-radius:50%;background:var(--ink);color:#fff;border:1px solid var(--line-dark);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;z-index:200;opacity:0;pointer-events:none;transform:translateY(12px);transition:all .25s var(--ease);box-shadow:var(--sh-2);}
+#toTop.show{opacity:1;pointer-events:auto;transform:none;}
+#toTop:hover{background:var(--brass);}
+
+/* ---------- Lusion: custom cursor ---------- */
+.cursor,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:1000;border-radius:50%;transform:translate(-50%,-50%);}
+.cursor{width:8px;height:8px;background:var(--brass);box-shadow:0 0 0 1.5px rgba(255,255,255,.6);}
+.cursor-ring{width:40px;height:40px;border:1.5px solid rgba(59,130,196,.55);display:flex;align-items:center;justify-content:center;transition:width .3s var(--ease),height .3s var(--ease),background .3s,border-color .3s;}
+.cursor-ring span{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:#1f4e79;text-transform:uppercase;opacity:0;transition:opacity .2s;}
+.cursor-ring.on{width:72px;height:72px;background:rgba(59,130,196,.12);border-color:transparent;}
+.cursor-ring.on span{opacity:1;}
+body.has-cursor{cursor:none;}
+body.has-cursor a,body.has-cursor button,body.has-cursor .quiz-opt,body.has-cursor .pill,body.has-cursor .feature,body.has-cursor .step,body.has-cursor .price-card{cursor:none;}
+
+/* ---------- Knoppen ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:15px 28px;border-radius:var(--r-sm);font-size:14.5px;font-weight:600;cursor:pointer;border:1.5px solid transparent;font-family:var(--body);transition:transform .18s var(--ease),box-shadow .18s var(--ease),background .18s,border-color .18s,color .18s;white-space:nowrap;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--brass);color:#0F2431;box-shadow:0 8px 20px rgba(59,130,196,.28);}
+.btn-primary:hover{background:var(--brass-deep);color:#fff;transform:translateY(-2px);box-shadow:0 12px 26px rgba(59,130,196,.32);}
+.btn-ghost{background:transparent;border-color:var(--line);color:var(--ink);}
+.btn-ghost:hover{border-color:var(--ink);transform:translateY(-2px);}
+.btn-ghost.on-dark{border-color:rgba(255,255,255,.5);color:#fff;}
+.btn-ghost.on-dark:hover{border-color:var(--brass);color:var(--brass);}
+.btn-dark{background:var(--ink);color:#fff;}
+.btn-dark:hover{background:var(--ink-3);transform:translateY(-2px);}
+.btn-sm{padding:10px 20px;font-size:13.5px;}
+.btn:focus-visible{outline:3px solid rgba(59,130,196,.5);outline-offset:2px;}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);transition:all .18s var(--ease);}
+.pill:hover{border-color:var(--brass);color:var(--ink);transform:translateY(-2px);box-shadow:var(--sh-1);}
+
+/* ---------- Nav ---------- */
+nav{position:fixed;top:0;left:0;right:0;background:rgba(18,22,26,.55);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.10);z-index:100;transition:background .3s,box-shadow .3s;}
+nav.scrolled{background:rgba(18,22,26,.88);box-shadow:0 10px 30px rgba(0,0,0,.25);}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px;}
+.logo{font-family:var(--disp);font-size:21px;font-weight:600;letter-spacing:-.5px;display:flex;align-items:center;gap:10px;color:#fff;}
+.logo-mark{width:36px;height:36px;background:var(--brass);color:#0F2431;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;}
+.logo-img{width:32px;height:32px;object-fit:contain;flex-shrink:0;}
+.nav-links{display:flex;gap:30px;font-size:13.5px;font-weight:500;color:rgba(255,255,255,.72);}
+.nav-links a{position:relative;padding:4px 0;transition:color .15s;}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:0;width:0;height:2px;background:var(--brass);transition:width .2s var(--ease);}
+.nav-links a:hover{color:#fff;}
+.nav-links a:hover::after{width:100%;}
+.nav-links a.active{color:#fff;}
+.nav-links a.active::after{width:100%;}
+.nav-burger{display:none;width:38px;height:38px;border:1.5px solid rgba(255,255,255,.35);border-radius:var(--r-sm);background:transparent;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;}
+/* Compacte icoon-knop voor Inloggen op smalle schermen — de tekstknoppen
+   ("Inloggen"/"Kies uw pakket") passen daar niet meer naast elkaar (zie
+   .nav-cta hieronder), maar inloggen moet ook zonder het uitklapmenu eerst
+   te hoeven openen bereikbaar blijven. */
+.nav-login-icon{display:none;width:38px;height:38px;border:1.5px solid rgba(255,255,255,.35);border-radius:var(--r-sm);background:transparent;color:#fff;font-size:16px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;}
+@media(max-width:560px){.nav-login-icon{display:flex;}}
+.nav-burger span,.nav-burger span::before,.nav-burger span::after{content:'';display:block;width:18px;height:2px;background:#fff;position:relative;transition:transform .2s var(--ease),opacity .2s var(--ease);}
+.nav-burger span::before{position:absolute;top:-6px;}
+.nav-burger span::after{position:absolute;top:6px;}
+.nav-burger.open span{background:transparent;}
+.nav-burger.open span::before{transform:translateY(6px) rotate(45deg);}
+.nav-burger.open span::after{transform:translateY(-6px) rotate(-45deg);}
+.nav-mobile-menu{display:none;flex-direction:column;gap:2px;background:rgba(18,22,26,.97);border-bottom:1px solid rgba(255,255,255,.12);padding:6px 26px 14px;}
+.nav-mobile-menu a{padding:12px 4px;font-size:14.5px;font-weight:500;color:#fff;border-bottom:1px solid rgba(255,255,255,.12);}
+.nav-mobile-menu a:last-child{border-bottom:none;}
+.nav-mobile-menu.open{display:flex;}
+.nav-mobile-cta{display:flex;gap:10px;padding-top:10px;}
+.nav-mobile-cta .btn{flex:1;justify-content:center;}
+/* Logo + Inloggen + Kies uw pakket + burger pasten niet naast elkaar op
+   telefoonbreedtes (getest 320–393px) — de burger viel letterlijk buiten
+   beeld en het menu was daardoor onbereikbaar. Onder 560px blijft alleen de
+   burger in de topbalk staan; Inloggen/Kies uw pakket staan al (nieuw)
+   bovenaan het uitklapmenu. */
+@media(max-width:560px){.nav-cta .btn-ghost,.nav-cta .btn-primary{display:none;}}
+@media(max-width:900px){.nav-links{display:none;}.nav-burger{display:flex;}}
+.nav-cta .btn-ghost{border-color:rgba(255,255,255,.45);color:#fff;}
+.nav-cta .btn-ghost:hover{border-color:var(--brass);color:var(--brass);}
+
+/* ---------- HERO (full-bleed foto) ---------- */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;color:var(--ink);overflow:hidden;padding-top:72px;}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(180deg,#F4F9FF,var(--paper));}
+/* ---- HERO-AFBEELDING (makkelijk aan te passen) ----
+   Zet hieronder een foto-URL in om een foto als hero-achtergrond te gebruiken, bijv.:
+   .hero-bg{ background:linear-gradient(180deg,rgba(244,249,255,.35),rgba(234,241,248,.5)), url('https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat; }
+   Laat de regel hierboven (gradient) staan voor leesbaarheid. ---- */
+.hero-bg::before{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(59,130,196,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,196,.07) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(110deg,transparent 20%,#000 100%);-webkit-mask-image:linear-gradient(110deg,transparent 20%,#000 100%);}
+.hero-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(760px 480px at 84% 26%,rgba(127,178,230,.32),transparent 60%);}
+.hero-inner{position:relative;z-index:2;max-width:640px;padding:80px 0 120px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--brass);margin-bottom:28px;}
+.hero-eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 5px rgba(59,130,196,.22);animation:pulse 2.4s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 5px rgba(59,130,196,.22);}50%{box-shadow:0 0 0 9px rgba(59,130,196,.08);}}
+.hero h1{font-size:clamp(44px,6.2vw,82px);line-height:1.0;letter-spacing:-2px;font-weight:500;margin-bottom:28px;}
+.hero h1 em{font-style:normal;color:var(--brass);}
+.h-line{display:block;overflow:hidden;padding-bottom:.24em;margin-bottom:-.24em;}
+.h-line>span{display:block;transform:translateY(112%);}
+.hero p{font-size:18px;color:var(--muted);max-width:520px;margin-bottom:38px;}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:44px;}
+.hero-meta{display:flex;gap:32px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+.hero-meta b{color:var(--ink);font-weight:600;}
+.entrance .hero-eyebrow{opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+.entrance .hero-actions,.entrance .hero-meta{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+.entrance .hero p{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+body.ready .entrance .hero-eyebrow{opacity:1;transform:none;transition-delay:.1s}
+body.ready .entrance .h-line>span{transform:none;transition:transform .9s var(--ease);}
+body.ready .entrance .h-line:nth-child(2)>span{transition-delay:.15s;}
+body.ready .entrance .hero p{opacity:1;transform:none;transition-delay:.3s;}
+body.ready .entrance .hero-actions{opacity:1;transform:none;transition-delay:.45s;}
+body.ready .entrance .hero-meta{opacity:1;transform:none;transition-delay:.6s;}
+
+/* zwevende stat-kaart over foto */
+.hero-card{position:absolute;right:26px;bottom:110px;z-index:3;width:min(330px,calc(100% - 52px));background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;color:var(--ink);box-shadow:var(--sh-2);}
+.hero-card .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;}
+.hero-card .row:last-child{border-bottom:none;}
+.hero-card .lbl{color:var(--muted);font-size:12.5px;}
+.hero-card .val{font-family:var(--mono);font-weight:600;color:var(--brass-deep);}
+@media(max-width:760px){
+  /* .hero-card werd hier al op position:static/width:100% gezet om onder de
+     heldentekst te stapelen — maar .hero zelf bleef een flex-rij zonder
+     wrap, dus de kaart bleef in dezelfde rij staan en werd teruggeknepen
+     (gemeten: 139px breed i.p.v. de bedoelde ~volledige breedte), overlappend
+     met de tekst ernaast. Nu ook de ouder naar een kolom gezet. */
+  .hero{flex-direction:column;align-items:center;text-align:center;}
+  .hero-inner{align-items:center;}
+  .hero-eyebrow,.hero-actions{justify-content:center;}
+  .hero p{margin-left:auto;margin-right:auto;}
+  /* De drie losse vertrouwens-regels (AVG-proof/koppelt/overal) staan op
+     desktop naast de statistiekenkaart en lezen daar prima; op mobiel
+     stapelen ze er los bovenop en voelen als 6 losse, ongerelateerde
+     weetjes. Op mobiel daarom verborgen — de statistiekenkaart hieronder
+     maakt het verhaal van de kop ("dat zichzelf regelt") al concreet, en
+     dezelfde vertrouwenspunten komen verderop terug in de functies. */
+  .hero-meta{display:none;}
+  .hero-card{position:static;width:100%;margin-top:10px;}
+}
+
+/* ---------- Marquee ---------- */
+.marquee{background:var(--ink);color:#E8E2D5;overflow:hidden;border-top:1px solid var(--line-dark);border-bottom:1px solid var(--line-dark);padding:15px 0;position:relative;transform:rotate(-1deg) scale(1.02);margin:30px 0;}
+.marquee-track{display:flex;white-space:nowrap;width:max-content;animation:marq 30s linear infinite;}
+.marquee:hover .marquee-track{animation-play-state:paused;}
+.marquee-group{display:flex;align-items:center;}
+.marquee-group span{font-family:var(--mono);font-size:13px;letter-spacing:1px;text-transform:uppercase;color:rgba(232,226,213,.8);padding:0 16px;}
+.marquee-group i{font-style:normal;color:var(--brass);font-family:var(--mono);}
+@keyframes marq{to{transform:translateX(-50%);}}
+
+/* ---------- Secties ---------- */
+.section{padding:100px 0;position:relative;}
+.section.dark{background:var(--ink);color:#E8E2D5;}
+.section.ivory{background:var(--paper);}
+.section.white{background:var(--surface);}
+.sec-eyebrow{font-family:var(--mono);font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:2px;color:var(--brass-deep);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.dark .sec-eyebrow{color:var(--brass);}
+.sec-nr{color:var(--brass);letter-spacing:0;}
+.sec-title{font-size:clamp(32px,4.4vw,50px);font-weight:500;letter-spacing:-1.2px;line-height:1.08;margin-bottom:18px;}
+.sec-sub{font-size:16.5px;color:var(--muted);max-width:620px;margin-bottom:50px;}
+.dark .sec-sub{color:var(--muted-dark);}
+.center{text-align:center;}
+.center .sec-sub{margin-left:auto;margin-right:auto;}
+.center .sec-eyebrow{justify-content:center;}
+
+/* ---------- Stats band ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line-dark);border-radius:20px;overflow:hidden;background:var(--ink);}
+.stat{padding:36px 26px;text-align:center;color:#fff;border-left:1px solid var(--line-dark);}
+.stat:first-child{border-left:none;}
+.stat .num{font-family:var(--mono);font-size:42px;font-weight:600;color:var(--brass);line-height:1;}
+.stat .num small{font-size:20px;}
+.stat .lbl{font-size:12px;color:var(--muted-dark);margin-top:10px;letter-spacing:1px;text-transform:uppercase;}
+@media(max-width:760px){.stats{grid-template-columns:1fr 1fr;}.stat{border-left:none;border-top:1px solid var(--line-dark);}.stat:nth-child(1),.stat:nth-child(2){border-top:none;}}
+
+/* ---------- Features (fotokaarten + tekst) ---------- */
+.features{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;}
+.f-8{grid-column:span 8}.f-4{grid-column:span 4}.f-6{grid-column:span 6}
+@media(max-width:880px){.f-8,.f-4,.f-6{grid-column:span 12}}
+.feature{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px;transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s;position:relative;overflow:hidden;will-change:transform;transform-style:preserve-3d;}
+.feature::before{content:'';position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .35s var(--ease);pointer-events:none;z-index:1;background:radial-gradient(280px circle at var(--mx,50%) var(--my,50%),rgba(59,130,196,.08),transparent 70%);}
+.feature:hover::before{opacity:1;}
+.feature>*{position:relative;z-index:2;}
+.feature:hover{transform:translateY(-4px);box-shadow:var(--sh-2);border-color:rgba(59,130,196,.5);}
+.feature.dark{background:var(--ink);border-color:var(--ink);color:#E8E2D5;}
+.feature.dark p{color:var(--muted-dark);}
+.f-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px;}
+.feature h3{font-size:19px;font-weight:600;margin-bottom:9px;}
+.feature p{font-size:14px;color:var(--muted);}
+.photo-card{position:relative;border-radius:var(--r);overflow:hidden;min-height:300px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:26px;background:#0E1114;background-size:cover;background-position:center;box-shadow:var(--sh-1);}
+.photo-card::before{content:'';position:absolute;inset:0;background:linear-gradient(0deg,rgba(14,17,20,.82),rgba(14,17,20,.05) 55%);}
+.photo-card>*{position:relative;z-index:1;}
+.photo-card h3{font-size:21px;font-weight:600;margin-bottom:6px;}
+.photo-card p{font-size:13.5px;color:rgba(255,255,255,.82);}
+.photo-card .tag{position:absolute;top:18px;left:18px;z-index:2;font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#0F2431;background:var(--brass);padding:5px 12px;border-radius:100px;}
+.feed{display:grid;gap:8px;margin-top:18px;}
+.feed-row{display:flex;gap:9px;align-items:center;font-size:12.5px;background:rgba(255,255,255,.06);border:1px solid var(--line-dark);border-radius:10px;padding:10px 12px;color:#E8E2D5;}
+.feed-row .t{font-family:var(--mono);font-size:10.5px;color:var(--muted-dark);margin-left:auto;flex-shrink:0;}
+.mini-bars{display:flex;align-items:flex-end;gap:7px;height:60px;margin-top:16px;}
+.mini-bars i{flex:1;background:linear-gradient(180deg,var(--brass),var(--brass-deep));border-radius:4px 4px 0 0;animation:rise 1s var(--ease) both;}
+@keyframes rise{from{transform:scaleY(0);transform-origin:bottom;}}
+.f-kpi{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--brass);margin-top:16px;}
+.f-kpi small{font-family:var(--body);font-size:11.5px;color:var(--muted);font-weight:500;display:block;letter-spacing:.3px;}
+
+/* ---------- Parallax-deler ---------- */
+.parallax{min-height:52vh;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;background:#0E1114;background-size:cover;background-position:center;position:relative;}
+.parallax::before{content:'';position:absolute;inset:0;background:rgba(14,17,20,.62);}
+.parallax .inner{position:relative;z-index:1;max-width:720px;padding:0 26px;}
+.parallax .label{font-family:var(--mono);font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--brass);margin-bottom:18px;}
+.parallax h2{font-size:clamp(30px,4vw,46px);font-weight:500;letter-spacing:-1px;line-height:1.1;margin-bottom:14px;}
+.parallax p{color:rgba(255,255,255,.85);font-size:16px;}
+@media(min-width:901px){.parallax{background-attachment:fixed;}}
+
+/* ---------- Hoe het werkt (sticky) ---------- */
+.hoe-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:56px;align-items:start;}
+.hoe-intro{position:sticky;top:100px;}
+.hoe-steps{display:grid;gap:16px;}
+@media(max-width:880px){.hoe-grid{grid-template-columns:1fr;}.hoe-intro{position:static;}.hoe-steps{grid-template-columns:1fr;}}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px;position:relative;transition:transform .22s var(--ease),box-shadow .22s var(--ease);will-change:transform;transform-style:preserve-3d;}
+.step:hover{transform:translateY(-4px);box-shadow:var(--sh-1);}
+.step::before{content:'';position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .35s var(--ease);pointer-events:none;z-index:1;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(59,130,196,.07),transparent 70%);}
+.step:hover::before{opacity:1;}
+.step>*{position:relative;z-index:2;}
+.step-nr{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--brass-deep);background:var(--brass-soft);display:inline-flex;padding:6px 13px;border-radius:100px;margin-bottom:18px;}
+.step h3{font-size:19px;font-weight:600;margin-bottom:9px;}
+.step p{font-size:14px;color:var(--muted);}
+.hoe-steps > :nth-child(1){--i:0}.hoe-steps > :nth-child(2){--i:1}.hoe-steps > :nth-child(3){--i:2}
+.hoe-steps .reveal{transition-delay:calc(var(--i)*80ms);}
+
+/* ---------- Split (foto + tekst) ---------- */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+@media(max-width:880px){.split{grid-template-columns:1fr;}}
+.split-media{position:relative;border-radius:var(--r);overflow:hidden;min-height:420px;background:#0E1114;background-size:cover;background-position:center;}
+.split-media::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);border-radius:inherit;}
+.split-list{list-style:none;margin-top:6px;}
+.split-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line);font-size:15px;}
+.split-list li:last-child{border-bottom:none;}
+.split-list .ok{color:var(--brass-deep);font-weight:700;font-size:17px;line-height:1.2;}
+.split-list strong{display:block;font-size:16px;margin-bottom:2px;}
+
+/* ---------- Quiz ---------- */
+.quiz-box{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh-2);padding:42px;max-width:700px;margin:0 auto;}
+@media(max-width:600px){.quiz-box{padding:26px;}}
+.quiz-q{font-family:var(--disp);font-size:22px;font-weight:600;letter-spacing:-.4px;margin-bottom:22px;}
+.quiz-opts{display:grid;gap:11px;}
+.quiz-opt{border:1.5px solid var(--line);border-radius:14px;padding:17px 18px;cursor:pointer;font-size:14.5px;display:flex;align-items:center;gap:14px;transition:all .16s var(--ease);background:var(--surface);text-align:left;font-family:var(--body);}
+.quiz-opt:hover{border-color:var(--brass);background:var(--brass-soft);transform:translateX(4px);}
+.quiz-opt .em{font-size:20px;}
+.quiz-result{display:none;}
+.pkg-check{display:flex;align-items:center;gap:10px;font-size:13.5px;padding:9px 0;border-bottom:1px solid var(--line);}
+.pkg-check .ok{color:var(--brass-deep);font-weight:700;}
+.zoekbar{width:100%;padding:14px 17px;border:1.5px solid var(--line);border-radius:12px;font-size:14.5px;font-family:var(--body);outline:none;margin-bottom:10px;transition:border-color .15s;background:var(--surface);}
+.zoekbar:focus{border-color:var(--brass-deep);}
+.zoek-result{border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:13.5px;cursor:pointer;transition:all .14s;}
+.zoek-result:hover{background:var(--brass-soft);border-color:var(--brass-deep);}
+
+/* ---------- Prijzen ---------- */
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch;}
+@media(max-width:880px){.price-grid{grid-template-columns:1fr;max-width:460px;margin:0 auto;}}
+.price-card{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:30px;display:flex;flex-direction:column;transition:transform .22s var(--ease),box-shadow .22s var(--ease);position:relative;will-change:transform;transform-style:preserve-3d;}
+.price-card:hover{transform:translateY(-4px);box-shadow:var(--sh-1);}
+.price-card::before{content:'';position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .35s var(--ease);pointer-events:none;z-index:1;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(59,130,196,.07),transparent 70%);}
+.price-card:hover::before{opacity:1;}
+.price-card>*{position:relative;z-index:2;}
+.price-card.featured{background:var(--ink);border-color:var(--ink);color:#E8E2D5;box-shadow:var(--sh-2);}
+.price-card.featured::after{content:'+';position:absolute;top:16px;right:18px;font-family:var(--mono);font-size:14px;color:var(--brass);}
+.price-tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--brass);color:#0F2431;font-size:11px;font-weight:700;letter-spacing:.5px;padding:5px 16px;border-radius:100px;font-family:var(--mono);box-shadow:var(--sh-1);}
+.price-name{font-family:var(--disp);font-size:20px;font-weight:600;margin-bottom:4px;}
+.price-for{font-size:12.5px;color:var(--muted);margin-bottom:18px;}
+.featured .price-for{color:var(--muted-dark);}
+.price-amount{font-family:var(--mono);font-size:40px;font-weight:600;letter-spacing:-1px;}
+.price-amount span{font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted);}
+.featured .price-amount{color:var(--brass);}
+.featured .price-amount span{color:var(--muted-dark);}
+.price-feats{margin:22px 0 26px;flex:1;}
+.price-feat{display:flex;gap:10px;font-size:13px;padding:6px 0;}
+.price-feat .ok{color:var(--brass-deep);font-weight:700;}
+.featured .price-feat .ok{color:var(--brass);}
+.price-feat.na{color:#B4AC9D;}
+.featured .price-feat.na{color:rgba(255,255,255,.32);}
+
+/* ---------- Contact & footer ---------- */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;}
+@media(max-width:840px){.contact-grid{grid-template-columns:1fr;}}
+.contact-media{position:relative;border-radius:var(--r);overflow:hidden;min-height:420px;background:#0E1114;background-size:cover;background-position:center;}
+.form-field{margin-bottom:16px;}
+.form-field label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted);letter-spacing:.3px;}
+.form-field input,.form-field textarea{width:100%;padding:14px 15px;border:1.5px solid var(--line);border-radius:var(--r-sm);font-family:var(--body);font-size:13.5px;outline:none;transition:border-color .15s;background:var(--surface);}
+.pw-wrap{position:relative;}
+.pw-wrap input{padding-right:44px !important;}
+.pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:8px;color:var(--muted);line-height:1;}
+.pw-toggle:hover{color:var(--ink);}
+.form-field input:focus,.form-field textarea:focus{border-color:var(--brass-deep);}
+footer{background:var(--ink-4);color:var(--muted-dark);padding:60px 0 32px;font-size:13px;border-top:1px solid var(--line-dark);}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;margin-bottom:40px;}
+@media(max-width:840px){.footer-grid{grid-template-columns:1fr 1fr;}}
+footer h4{color:#E8E2D5;font-family:var(--disp);font-size:15px;margin-bottom:14px;}
+footer a{display:block;padding:4px 0;transition:color .14s;}
+footer a:hover{color:var(--brass);}
+.footer-bottom{border-top:1px solid var(--line-dark);padding-top:22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:#6E767C;}
+
+/* ---------- Modals & cookie ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(14,17,20,.7);backdrop-filter:blur(4px);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--surface);border-radius:22px;padding:38px;width:410px;max-width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:modalIn .28s var(--ease);}
+.auth-tabs2{display:flex;gap:4px;background:var(--paper);border-radius:12px;padding:4px;margin-bottom:20px;}
+.auth-tab2{flex:1;text-align:center;padding:9px;font-size:13px;font-weight:600;border-radius:9px;cursor:pointer;color:var(--muted);transition:all .15s var(--ease);}
+.auth-tab2.active{background:var(--surface);color:var(--ink);box-shadow:var(--sh-1);}
+.auth-msg2{font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:14px;line-height:1.5;background:var(--brass-soft);color:#1f4e79;}
+.auth-msg2.ok{background:var(--clay-soft);color:var(--clay);}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:none;}}
+.modal-box h3{font-size:21px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px;}
+.modal-box .sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+.cookie-banner{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);width:min(720px,calc(100vw - 32px));background:var(--ink);color:#E8E2D5;padding:16px 20px;z-index:250;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;border-radius:14px;box-shadow:var(--sh-2);}
+.cookie-banner a{text-decoration:underline;color:var(--brass);}
+.cookie-banner .btn-ghost{border-color:var(--line-dark);color:#E8E2D5;}
+.cookie-banner .btn-ghost:hover{border-color:var(--brass);color:var(--brass);}
+
+/* ---------- Reveal & toegankelijkheid ---------- */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .8s var(--ease),transform .8s var(--ease);}
+.reveal.in{opacity:1;transform:none;}
+.reveal.left{transform:translateX(-46px);}
+.reveal.right{transform:translateX(46px);}
+.reveal.scale{transform:scale(.95);}
+.reveal.left.in,.reveal.right.in,.reveal.scale.in{transform:none;}
+.features > :nth-child(1){--i:0}.features > :nth-child(2){--i:1}.features > :nth-child(3){--i:2}
+.features > :nth-child(4){--i:3}.features > :nth-child(5){--i:4}.features > :nth-child(6){--i:5}
+.features > :nth-child(7){--i:6}.features > :nth-child(8){--i:7}.features > :nth-child(9){--i:8}
+.features .reveal{transition-delay:calc(var(--i)*80ms);}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;}
+  .reveal{opacity:1;transform:none;}
+  .entrance .hero-eyebrow,.entrance .hero p,.entrance .hero-actions,.entrance .hero-meta{opacity:1;transform:none;}
+  .h-line>span{transform:none;}
+  html{scroll-behavior:auto;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="container nav-inner">
+    <a href="#top" class="logo"><img src="assets/logo-wit.png" alt="Ankova" class="logo-img">Ankova</a>
+    <div class="nav-links">
+      <a href="#functies">Functies</a>
+      <a href="#hoe">Hoe het werkt</a>
+      <a href="#start">Aan de slag</a>
+      <a href="#prijzen">Prijzen</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-cta" style="display:flex;gap:10px;align-items:center">
+      <button class="btn btn-ghost on-dark btn-sm" onclick="openLogin()">Inloggen</button>
+      <button class="btn btn-primary btn-sm" onclick="scrollTo2('prijzen')">Kies uw pakket</button>
+      <button class="nav-login-icon" onclick="openLogin()" aria-label="Inloggen">👤</button>
+      <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false" onclick="toggleMobileNav()"><span></span></button>
+    </div>
+  </div>
+  <div class="nav-mobile-menu" id="navMobileMenu">
+    <div class="nav-mobile-cta">
+      <button class="btn btn-ghost on-dark btn-sm" onclick="closeMobileNav();openLogin()">Inloggen</button>
+      <button class="btn btn-primary btn-sm" onclick="closeMobileNav();scrollTo2('prijzen')">Kies uw pakket</button>
+    </div>
+    <a href="#functies" onclick="closeMobileNav()">Functies</a>
+    <a href="#hoe" onclick="closeMobileNav()">Hoe het werkt</a>
+    <a href="#start" onclick="closeMobileNav()">Aan de slag</a>
+    <a href="#prijzen" onclick="closeMobileNav()">Prijzen</a>
+    <a href="#contact" onclick="closeMobileNav()">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="container hero-inner entrance">
+    <div class="hero-eyebrow"><span class="dot"></span>Portaal voor verhuurders &amp; beheerders</div>
+    <h1><span class="h-line"><span>Vastgoedbeheer</span></span><span class="h-line"><span>dat <em>zichzelf regelt.</em></span></span></h1>
+    <p>Panden, huurders, meldingen, onderhoud, documenten en boekhouding — met AI die meekijkt, vakmensen inschakelt en uw rendement scherp houdt.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="scrollTo2('start')">Start vandaag →</button>
+      <button class="btn btn-ghost" onclick="scrollTo2('functies')">Bekijk de functies</button>
+    </div>
+    <div class="hero-meta">
+      <div>🔒 <b>AVG-proof</b> · data in de EU</div>
+      <div>🏦 <b>Koppelt</b> met boekhouding &amp; bank</div>
+      <div>📱 <b>Overal</b> — computer, tablet, telefoon</div>
+    </div>
+  </div>
+  <div class="hero-card">
+    <div class="row"><span class="lbl">Netto rendement</span><span class="val"><span class="count" data-count="6.1" data-dec="1">0,0</span>%</span></div>
+    <div class="row"><span class="lbl">Huur vandaag ontvangen</span><span class="val">€ <span class="count" data-count="1850" data-dec="0">0</span></span></div>
+    <div class="row"><span class="lbl">Panden betaald</span><span class="val"><span class="count" data-count="7" data-dec="0">0</span>/8</span></div>
+  </div>
+</header>
+
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <div class="marquee-group">
+      <span>Panden</span><i>◆</i><span>Huurders</span><i>◆</i><span>Meldingen</span><i>◆</i><span>Onderhoud</span><i>◆</i><span>Boekhouding</span><i>◆</i><span>Rendement</span><i>◆</i><span>AI-assistent</span><i>◆</i><span>Documenten</span><i>◆</i><span>Agenda &amp; Mail</span><i>◆</i><span>Verkoop &amp; Verhuur</span><i>◆</i>
+    </div>
+    <div class="marquee-group">
+      <span>Panden</span><i>◆</i><span>Huurders</span><i>◆</i><span>Meldingen</span><i>◆</i><span>Onderhoud</span><i>◆</i><span>Boekhouding</span><i>◆</i><span>Rendement</span><i>◆</i><span>AI-assistent</span><i>◆</i><span>Documenten</span><i>◆</i><span>Agenda &amp; Mail</span><i>◆</i><span>Verkoop &amp; Verhuur</span><i>◆</i>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<section class="section dark" style="padding:60px 0">
+  <div class="container">
+    <div class="stats reveal scale">
+      <div class="stat"><div class="num"><span class="count" data-count="6.1" data-dec="1">0,0</span><small>%</small></div><div class="lbl">Netto rendement</div></div>
+      <div class="stat"><div class="num">€<span class="count" data-count="1850" data-dec="0">0</span></div><div class="lbl">Huur per dag gemiddeld</div></div>
+      <div class="stat"><div class="num"><span class="count" data-count="14" data-dec="0">0</span><small>dgn</small></div><div class="lbl">Gratis uitproberen</div></div>
+      <div class="stat"><div class="num"><span class="count" data-count="100" data-dec="0">0</span><small>%</small></div><div class="lbl">Data in de EU</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNCTIES -->
+<section class="section ivory" id="functies">
+  <div class="container">
+    <div class="reveal">
+      <div class="sec-eyebrow"><span class="sec-nr">01</span>Wat het portaal doet</div>
+      <h2 class="sec-title">Alles wat u nu in vijf systemen doet — in één.</h2>
+      <p class="sec-sub">Elke module werkt samen: een melding wordt een onderhoudsopdracht, een opdracht wordt een kostenpost, een kostenpost telt mee in uw rendement.</p>
+    </div>
+    <div class="features">
+      <div class="feature f-8 reveal"><div class="f-ico" style="background:var(--brass-soft)">🔧</div><h3>Meldingen &amp; onderhoud</h3><p>Huurders melden, de AI stuurt door naar de juiste vakman — met prijsindicatie, automatische mails en bezoekafspraken richting uw huurders. Preventief onderhoud per onderdeel (ketel, dak, schilderwerk) wordt automatisch bewaakt.</p></div>
+      <div class="photo-card f-4 reveal" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))"><span class="tag">Portefeuille</span><h3>Van wonen tot commercieel</h3><p>Elke vastgoedcategorie — in één portaal beheerd.</p></div>
+      <div class="feature f-4 dark reveal"><div class="f-ico" style="background:rgba(59,130,196,.2)">💶</div><h3>Huurbewaking</h3><p>Direct zien welke huur binnen is en welke niet.</p>
+        <div class="feed">
+          <div class="feed-row">✓ Keizersgracht 42 — betaald <span class="t">09:12</span></div>
+          <div class="feed-row">✓ Herengracht 112 — betaald <span class="t">09:12</span></div>
+          <div class="feed-row" style="border-color:rgba(59,130,196,.6)">✦ Overtoom 302 — herinnering <span class="t">nu</span></div>
+        </div>
+      </div>
+      <div class="photo-card f-8 reveal" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))"><span class="tag">AI</span><h3>De AI regelt het onderhoud</h3><p>Melding → juiste vakman → prijsindicatie → afspraak → afronding. Zodra de vakman klaar is, krijgen u en uw huurder automatisch bericht dat de melding is opgelost.</p></div>
+      <div class="feature f-4 reveal"><div class="f-ico" style="background:var(--brass-soft)">📊</div><h3>Rendement &amp; prognoses</h3><p>Bruto, netto en rendement op eigen vermogen per pand.</p>
+        <div class="mini-bars"><i style="height:38%"></i><i style="height:52%"></i><i style="height:47%"></i><i style="height:66%"></i><i style="height:74%"></i><i style="height:88%"></i></div>
+        <div class="f-kpi"><span class="count" data-count="6.1" data-dec="1">0,0</span>%<small>netto rendement portefeuille</small></div>
+      </div>
+      <div class="feature f-4 reveal"><div class="f-ico" style="background:var(--brass-soft)">🧾</div><h3>Boekhouding &amp; belasting</h3><p>Koppel Exact Online, Moneybird of e-Boekhouden. Uw jaaroverzicht wordt automatisch bijgewerkt, met een schatting van uw fiscale positie — geen vervanging voor uw officiële aangifte of accountant.</p></div>
+      <div class="feature f-4 reveal"><div class="f-ico" style="background:#E9E0F0">📁</div><h3>Documenten per pand</h3><p>Contracten, facturen, vergunningen en foto's — automatisch geordend per pand en relatie.</p></div>
+      <div class="feature f-6 reveal"><div class="f-ico" style="background:#E3ECF6">📅</div><h3>Agenda &amp; mail met AI</h3><p>Afspraken uit e-mails komen automatisch in de agenda, de AI stelt antwoorden op, elk teamlid koppelt veilig zijn eigen mailbox.</p></div>
+      <div class="feature f-6 reveal"><div class="f-ico" style="background:var(--clay-soft)">🏷️</div><h3>Verkoop &amp; verhuur</h3><p>Koppel uw makelaar — hij zet het pand op de markt en houdt bezichtigingen en biedingen bij. De AI leest dit mee vanuit de mail en zet het automatisch in uw agenda en het verkoop- en verhuuroverzicht.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PARALLAX-DELER -->
+<section class="parallax" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))">
+  <div class="inner reveal">
+    <div class="label">Van melding naar oplossing</div>
+    <h2>Vakmensen worden automatisch ingeschakeld.</h2>
+    <p>Met prijsindicatie, planning en communicatie naar uw huurder — zonder dat u eraan te pas komt.</p>
+  </div>
+</section>
+
+<!-- HOE HET WERKT -->
+<section class="section white" id="hoe">
+  <div class="container">
+    <div class="hoe-grid">
+      <div class="hoe-intro reveal">
+        <div class="sec-eyebrow"><span class="sec-nr">02</span>Hoe het werkt</div>
+        <h2 class="sec-title">In drie stappen operationeel.</h2>
+        <p class="sec-sub">Van aansluiten naar volledig automatisch beheer — zo snel is het geregeld.</p>
+        <div style="margin-top:30px"><button class="btn btn-primary" onclick="scrollTo2('start')">Begin vandaag →</button></div>
+      </div>
+      <div class="hoe-steps">
+        <div class="step reveal"><div class="step-nr">Stap 1</div><h3>Voeg uw panden toe</h3><p>Adres, huurders, WOZ-waarde, onderhoudsstaat — of laat uw beheerder of makelaar het aanvullen.</p></div>
+        <div class="step reveal"><div class="step-nr">Stap 2</div><h3>Koppel uw tools</h3><p>Uw mail, boekhoudpakket en (optioneel) bank. Vanaf dat moment kijkt de AI met u mee.</p></div>
+        <div class="step reveal"><div class="step-nr">Stap 3</div><h3>Laat het systeem werken</h3><p>Meldingen, herinneringen, afspraken en administratie lopen grotendeels vanzelf. U houdt overzicht en beslist.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPLIT (foto + tekst) -->
+<section class="section ivory" id="overzicht">
+  <div class="container split">
+    <div class="split-media reveal left" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))"></div>
+    <div class="reveal right">
+      <div class="sec-eyebrow"><span class="sec-nr">03</span>Overzicht op elk niveau</div>
+      <h2 class="sec-title">Eén portaal. Elke relatie. Elk pand.</h2>
+      <p class="sec-sub">Van dagelijks beheer tot jaarcijfers — alles staat klaar wanneer u ernaar vraagt.</p>
+      <ul class="split-list">
+        <li><span class="ok">✓</span><div><strong>Panden &amp; huurders</strong>Alle gegevens, contracten en historie op één plek.</div></li>
+        <li><span class="ok">✓</span><div><strong>Financiën &amp; belasting</strong>Jaaroverzicht automatisch bijgewerkt vanuit uw boekhouding, met een fiscale schatting.</div></li>
+        <li><span class="ok">✓</span><div><strong>Samenwerking</strong>Beheerder, makelaar en aannemer krijgen de juiste toegang.</div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- AAN DE SLAG -->
+<section class="section dark" id="start">
+  <div class="container">
+    <div class="center reveal">
+      <div class="sec-eyebrow"><span class="sec-nr">04</span>Aan de slag</div>
+      <h2 class="sec-title" style="color:#fff">Wat is uw rol?</h2>
+      <p class="sec-sub">Dan stellen we het juiste pakket voor — of brengen we u in contact met uw verhuurder.</p>
+    </div>
+    <div class="quiz-box reveal scale">
+      <div id="quiz-step1">
+        <div class="quiz-q">Wat doet u in vastgoed?</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" onclick="quizKies('verhuurder')"><span class="em">🏠</span><span><strong>Ik verhuur of beheer panden</strong><br><small style="color:var(--muted)">Eigenaar, belegger of beheerbedrijf</small></span></button>
+          <button class="quiz-opt" onclick="quizKies('professional')"><span class="em">🛠️</span><span><strong>Ik werk in het vastgoed</strong><br><small style="color:var(--muted)">Makelaar, aannemer of ontwikkelaar</small></span></button>
+          <button class="quiz-opt" onclick="quizKies('huurder')"><span class="em">🔑</span><span><strong>Ik ben huurder of klant</strong><br><small style="color:var(--muted)">Mijn verhuurder gebruikt Ankova</small></span></button>
+        </div>
+      </div>
+      <div class="quiz-result" id="quiz-verhuurder">
+        <div class="quiz-q">Aanbevolen: het Beheer-pakket</div>
+        <div class="pkg-check"><span class="ok">✓</span> Panden, huurders &amp; meldingen</div>
+        <div class="pkg-check"><span class="ok">✓</span> Onderhoud met AI-doorsturing naar vakmensen</div>
+        <div class="pkg-check"><span class="ok">✓</span> Huurbewaking &amp; automatische herinneringen</div>
+        <div class="pkg-check"><span class="ok">✓</span> Boekhouding-koppeling &amp; automatisch jaaroverzicht</div>
+        <div class="pkg-check"><span class="ok">✓</span> Documenten, agenda &amp; mail met AI</div>
+        <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="scrollTo2('prijzen')">Bekijk prijzen →</button>
+          <button class="btn btn-ghost" onclick="quizReset()">← Terug</button>
+        </div>
+      </div>
+      <div class="quiz-result" id="quiz-professional">
+        <div class="quiz-q">Stel uw eigen pakket samen</div>
+        <p style="font-size:13.5px;color:var(--muted);margin-bottom:14px">Kies wat u nodig heeft — een paar suggesties op basis van uw rol:</p>
+        <div class="pkg-check"><input type="checkbox" checked> Verkoop &amp; verhuur-aanbod beheren</div>
+        <div class="pkg-check"><input type="checkbox" checked> Documenten &amp; brochures</div>
+        <div class="pkg-check"><input type="checkbox" checked> Toegang tot panden van uw opdrachtgever — nieuwe huurders en opleveringen zelf insturen</div>
+        <div class="pkg-check"><input type="checkbox"> Meldingen &amp; onderhoud (voor aannemers)</div>
+        <div class="pkg-check"><input type="checkbox"> Projecten &amp; STIKO (voor ontwikkelaars)</div>
+        <div class="pkg-check"><input type="checkbox"> Boekhouding &amp; transacties</div>
+        <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="scrollTo2('prijzen')">Bekijk prijzen →</button>
+          <button class="btn btn-ghost" onclick="quizReset()">← Terug</button>
+        </div>
+      </div>
+      <div class="quiz-result" id="quiz-huurder">
+        <div class="quiz-q">Zoek uw verhuurder of beheerder</div>
+        <p style="font-size:13.5px;color:var(--muted);margin-bottom:14px">Vraag toegang aan bij uw verhuurder. Zodra die dit goedkeurt, kunt u meldingen doen en uw huurcontract en andere documenten inzien en opvragen — gratis.</p>
+        <input class="zoekbar" id="huurderZoek" placeholder="Zoek op naam van uw verhuurder of beheerbedrijf…" oninput="zoekVerhuurder()">
+        <div id="zoekResultaten"></div>
+        <button class="btn btn-ghost" style="margin-top:12px" onclick="quizReset()">← Terug</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIJZEN -->
+<section class="section white" id="prijzen">
+  <div class="container">
+    <div class="center reveal">
+      <div class="sec-eyebrow"><span class="sec-nr">05</span>Prijzen</div>
+      <h2 class="sec-title">Eenvoudige, eerlijke abonnementen.</h2>
+      <p class="sec-sub">Maandelijks opzegbaar. Veilig betalen via Mollie — iDEAL, creditcard of incasso.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card reveal left">
+        <div class="price-name">Start</div>
+        <div class="price-for">Tot 10 panden — grip op uw portefeuille</div>
+        <div class="price-amount">€ 100<span>/maand</span></div>
+        <div class="price-feats">
+          <div class="price-feat"><span class="ok">✓</span> Panden, huurders &amp; meldingen</div>
+          <div class="price-feat"><span class="ok">✓</span> Documenten per pand, eigen mappenstructuur</div>
+          <div class="price-feat"><span class="ok">✓</span> Agenda + 1 gekoppeld mailaccount</div>
+          <div class="price-feat"><span class="ok">✓</span> Huurbewaking (handmatige herinneringen)</div>
+          <div class="price-feat"><span class="ok">✓</span> Basis-rapportage per pand</div>
+          <div class="price-feat na">— AI-automatisering</div>
+          <div class="price-feat na">— Boekhouding-koppeling</div>
+        </div>
+        <button class="btn btn-ghost" style="width:100%" onclick="openRegisterMetPakket('Start')">Kies Start</button>
+      </div>
+      <div class="price-card featured reveal scale">
+        <div class="price-tag">Meest gekozen</div>
+        <div class="price-name">Beheer</div>
+        <div class="price-for">Onbeperkt panden — het portaal dat zichzelf regelt</div>
+        <div class="price-amount">€ 150<span>/maand</span></div>
+        <div class="price-feats">
+          <div class="price-feat"><span class="ok">✓</span> Alles uit Start, onbeperkt panden</div>
+          <div class="price-feat"><span class="ok">✓</span> AI: meldingen → vakman met prijsindicatie</div>
+          <div class="price-feat"><span class="ok">✓</span> AI: betalingsherinneringen, mailconcepten &amp; afspraken uit mail</div>
+          <div class="price-feat"><span class="ok">✓</span> Boekhouding-koppeling (Exact, Moneybird, e-Boekhouden)</div>
+          <div class="price-feat"><span class="ok">✓</span> Rendement, prognoses &amp; fiscale schatting</div>
+          <div class="price-feat"><span class="ok">✓</span> Preventief onderhoud per onderdeel</div>
+          <div class="price-feat"><span class="ok">✓</span> Verkoop &amp; verhuur met makelaarkoppeling</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="openRegisterMetPakket('Beheer')">Kies Beheer</button>
+      </div>
+      <div class="price-card reveal right">
+        <div class="price-name">Bedrijf</div>
+        <div class="price-for">Beheerbedrijven &amp; teams — samenwerken op schaal</div>
+        <div class="price-amount">€ 250<span>/maand</span></div>
+        <div class="price-feats">
+          <div class="price-feat"><span class="ok">✓</span> Alles uit Beheer</div>
+          <div class="price-feat"><span class="ok">✓</span> Meerdere gebruikers, elk eigen mail &amp; rechten</div>
+          <div class="price-feat"><span class="ok">✓</span> Eigen toegang voor aannemers &amp; makelaars</div>
+          <div class="price-feat"><span class="ok">✓</span> Bankkoppeling (PSD2) — directe betaalsignalering</div>
+          <div class="price-feat"><span class="ok">✓</span> Prioriteitssupport &amp; persoonlijke onboarding</div>
+        </div>
+        <button class="btn btn-dark" style="width:100%" onclick="openRegisterMetPakket('Bedrijf')">Kies Bedrijf</button>
+      </div>
+    </div>
+    <p class="center" style="font-size:12.5px;color:var(--muted);margin-top:24px">Huurders en klanten van een Ankova-gebruiker betalen niets — zij vragen gewoon toegang aan bij hun verhuurder.</p>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section ivory" id="contact">
+  <div class="container contact-grid">
+    <div class="contact-media reveal left" style="background:linear-gradient(135deg,var(--ink),var(--ink-3))"></div>
+    <div class="reveal right">
+      <div class="sec-eyebrow"><span class="sec-nr">06</span>Contact</div>
+      <h2 class="sec-title">Vragen? We denken graag mee.</h2>
+      <p style="font-size:14.5px;color:var(--muted);margin-bottom:26px">Of u nu twee panden verhuurt of tweehonderd beheert — vertel ons uw situatie en we laten zien hoe Ankova bij u past.</p>
+      <div id="contactMsg" style="display:none;font-size:13px;margin-bottom:12px;padding:10px 12px;border-radius:8px;background:var(--ivory-2,#f3efe6)"></div>
+      <div class="form-field"><label for="contactNaam">Naam</label><input id="contactNaam" placeholder="Uw naam"></div>
+      <div class="form-field"><label for="contactEmail">E-mail</label><input type="email" id="contactEmail" placeholder="naam@voorbeeld.nl"></div>
+      <div class="form-field"><label for="contactBericht">Bericht</label><textarea id="contactBericht" rows="4" placeholder="Waar kunnen we mee helpen?"></textarea></div>
+      <button class="btn btn-primary" id="contactBtn" onclick="contactVerstuur()">Verstuur bericht</button>
+      <div style="font-size:13.5px;color:var(--muted);margin-top:24px;line-height:2">✉️ info@ankova.nl · 📞 telefoonnummer volgt · 📍 Utrecht, Nederland</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:14px"><img src="assets/logo-wit.png" alt="Ankova" class="logo-img">Ankova</div>
+        <p style="max-width:290px;color:#7E878D">Het portaal dat vastgoedbeheer automatiseert — voor verhuurders, beheerders en iedereen die met ze samenwerkt.</p>
+      </div>
+      <div><h4>Product</h4><a href="#functies">Functies</a><a href="#prijzen">Prijzen</a><a href="#" onclick="openLogin();return false">Inloggen</a></div>
+      <div><h4>Bedrijf</h4><a href="over-ons.html">Over ons</a><a href="over-ons.html#onze-visie">Onze visie</a><a href="#contact">Contact</a></div>
+      <div><h4>Juridisch</h4><a href="privacybeleid.html">Privacybeleid</a><a href="algemene-voorwaarden.html">Algemene voorwaarden</a><a href="verwerkersovereenkomst.html">Verwerkersovereenkomst</a><a href="#" onclick="document.getElementById('cookieBanner').style.display='flex';return false">Cookie-instellingen</a></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Ankova. Alle rechten voorbehouden.</span>
+      <span>KvK: — · BTW: — <em>(invullen vóór livegang)</em></span>
+    </div>
+  </div>
+</footer>
+
+<!-- LOGIN / REGISTREREN MODAL -->
+<div class="modal-overlay" id="loginModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-label="Inloggen of registreren">
+    <div class="auth-tabs2">
+      <div class="auth-tab2 active" id="tabInloggen" onclick="toonInlogTab()">Inloggen</div>
+      <div class="auth-tab2" id="tabRegistreren" onclick="toonRegistreerTab()">Registreren</div>
+    </div>
+    <div id="loginView">
+      <div class="sub" style="margin-bottom:16px">Log in en ga direct naar uw eigen portaal.</div>
+      <div id="loginMsg" class="auth-msg2" style="display:none"></div>
+      <div class="form-field"><label for="loginEmail">E-mail</label><input type="email" id="loginEmail" placeholder="naam@voorbeeld.nl"></div>
+      <div class="form-field"><label for="loginPw">Wachtwoord</label><div class="pw-wrap"><input type="password" id="loginPw" placeholder="••••••••"><button type="button" class="pw-toggle" onclick="pvsTogglePw('loginPw',this)" aria-label="Wachtwoord tonen">👁</button></div></div>
+      <div style="text-align:right;margin:-10px 0 14px"><a href="javascript:void(0)" onclick="toonWachtwoordVergetenView()" style="font-size:12px;color:var(--muted);text-decoration:underline">Wachtwoord vergeten?</a></div>
+      <button class="btn btn-primary" id="loginBtn" style="width:100%" onclick="doLogin()">Inloggen →</button>
+    </div>
+    <div id="wachtwoordVergetenView" style="display:none">
+      <div class="sub" style="margin-bottom:16px">Vul uw e-mailadres in — we sturen u een link om een nieuw wachtwoord in te stellen.</div>
+      <div id="wachtwoordVergetenMsg" class="auth-msg2" style="display:none"></div>
+      <div class="form-field"><label for="wvEmail">E-mail</label><input type="email" id="wvEmail" placeholder="naam@voorbeeld.nl"></div>
+      <button class="btn btn-primary" id="wvBtn" style="width:100%;margin-bottom:10px" onclick="wachtwoordVergetenVersturen()">Resetlink versturen →</button>
+      <button class="btn btn-ghost" style="width:100%" onclick="toonInlogTab()">← Terug naar inloggen</button>
+    </div>
+    <div id="nieuwWachtwoordView" style="display:none">
+      <div class="sub" style="margin-bottom:16px">Kies een nieuw wachtwoord voor uw account.</div>
+      <div id="nieuwWachtwoordMsg" class="auth-msg2" style="display:none"></div>
+      <div class="form-field"><label for="nwPw">Nieuw wachtwoord</label><div class="pw-wrap"><input type="password" id="nwPw" placeholder="Minimaal 6 tekens"><button type="button" class="pw-toggle" onclick="pvsTogglePw('nwPw',this)" aria-label="Wachtwoord tonen">👁</button></div></div>
+      <button class="btn btn-primary" id="nwBtn" style="width:100%" onclick="nieuwWachtwoordOpslaan()">Wachtwoord opslaan →</button>
+    </div>
+    <div id="registerView" style="display:none">
+      <div class="sub" style="margin-bottom:16px">14 dagen gratis. Betaalgegevens volgen in een latere stap — nu nog niet nodig.</div>
+      <div id="regPakketBadge" style="display:none;margin-bottom:14px;font-size:13px;font-weight:600;color:var(--brass-deep)"></div>
+      <div id="registerMsg" class="auth-msg2" style="display:none"></div>
+      <div class="form-field"><label for="regNaam">Uw naam</label><input id="regNaam" placeholder="Voor- en achternaam"></div>
+      <div class="form-field"><label for="regBedrijf">Bedrijfsnaam</label><input id="regBedrijf" placeholder="Uw bedrijf of eigen naam"></div>
+      <div class="form-field"><label for="regEmail">E-mail</label><input type="email" id="regEmail" placeholder="naam@voorbeeld.nl"></div>
+      <div class="form-field"><label for="regPw">Wachtwoord</label><div class="pw-wrap"><input type="password" id="regPw" placeholder="Minimaal 6 tekens"><button type="button" class="pw-toggle" onclick="pvsTogglePw('regPw',this)" aria-label="Wachtwoord tonen">👁</button></div></div>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:11.5px;color:var(--muted);margin:0 0 14px;line-height:1.5;cursor:pointer">
+        <input type="checkbox" id="regAkkoord" style="margin-top:2px;flex-shrink:0">
+        <span>Ik ga akkoord met de <a href="algemene-voorwaarden.html" target="_blank" style="text-decoration:underline;color:var(--ink)">algemene voorwaarden</a>, het <a href="privacybeleid.html" target="_blank" style="text-decoration:underline;color:var(--ink)">privacybeleid</a> en de <a href="verwerkersovereenkomst.html" target="_blank" style="text-decoration:underline;color:var(--ink)">verwerkersovereenkomst</a>.</span>
+      </label>
+      <button class="btn btn-primary" id="registerBtn" style="width:100%" onclick="doRegister()">Account aanmaken →</button>
+    </div>
+    <div id="verificatieView" style="display:none">
+      <div class="sub" style="margin-bottom:16px">We hebben een 6-cijferige code gestuurd naar <strong id="verificatieEmailTekst"></strong>. Vul die hieronder in om uw e-mailadres te bevestigen.</div>
+      <div id="verificatieMsg" class="auth-msg2" style="display:none"></div>
+      <div class="form-field"><label for="verificatieCode">Verificatiecode</label><input type="text" id="verificatieCode" inputmode="numeric" maxlength="6" placeholder="123456" style="letter-spacing:4px;font-size:18px;text-align:center"></div>
+      <button class="btn btn-primary" id="verificatieBtn" style="width:100%;margin-bottom:10px" onclick="verificatieCodeControleren()">Bevestigen →</button>
+      <div style="text-align:center;font-size:12px;color:var(--muted)">Geen mail ontvangen? <a href="javascript:void(0)" onclick="verificatieCodeOpnieuw()" style="text-decoration:underline;color:var(--ink)">Code opnieuw versturen</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- COOKIE BANNER -->
+<div class="cookie-banner" id="cookieBanner">
+  <span style="flex:1;min-width:220px">🍪 Wij gebruiken alleen functionele cookies en — met uw toestemming — analytische cookies. <a href="privacybeleid.html#cookies">Meer info</a></span>
+  <button class="btn btn-ghost btn-sm" onclick="cookieKeuze(false)">Alleen functioneel</button>
+  <button class="btn btn-primary btn-sm" onclick="cookieKeuze(true)">Accepteren</button>
+</div>
+
+<button id="toTop" onclick="smoothGo(0)" aria-label="Terug naar boven">↑</button>
+
+<script>
+// ===== Beweeglijke ervaring (respecteert prefers-reduced-motion) =====
+const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!prefersReduced) document.body.classList.add('ready');
+
+// Scroll-voortgang, nav, scrollspy, terug-naar-boven
+const nav=document.querySelector('nav');
+const progress=document.getElementById('progress');
+const toTop=document.getElementById('toTop');
+const sections=['functies','hoe','start','prijzen','contact'];
+const navLinks=document.querySelectorAll('.nav-links a');
+function onScroll(){
+  const y=window.scrollY;
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  if(progress) progress.style.width=(h>0?(y/h)*100:0)+'%';
+  if(nav) nav.classList.toggle('scrolled',y>40);
+  if(toTop) toTop.classList.toggle('show',y>700);
+  let cur='';
+  for(const id of sections){ const el=document.getElementById(id); if(el && el.offsetTop-140<=y) cur=id; }
+  navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+onScroll();
+
+// Lusion: custom cursor (alleen muis/desktop)
+const pointerFine=window.matchMedia('(pointer:fine)').matches;
+const hoverCapable=window.matchMedia('(hover:hover)').matches;
+if(pointerFine && hoverCapable && !prefersReduced){
+  document.body.classList.add('has-cursor');
+  const dot=document.createElement('div'); dot.className='cursor';
+  const ring=document.createElement('div'); ring.className='cursor-ring';
+  ring.innerHTML='<span>open</span>';
+  document.body.appendChild(dot); document.body.appendChild(ring);
+  let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+  window.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; });
+  (function follow(){ rx+=(mx-rx)*0.18; ry+=(my-ry)*0.18; dot.style.left=mx+'px'; dot.style.top=my+'px'; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(follow); })();
+  document.querySelectorAll('a,button,.quiz-opt,.pill,.feature,.step,.price-card,.photo-card').forEach(el=>{
+    el.addEventListener('mouseenter',()=>ring.classList.add('on'));
+    el.addEventListener('mouseleave',()=>ring.classList.remove('on'));
+  });
+}
+
+// Lusion: inertia smooth scroll
+const smoothOn=pointerFine && hoverCapable && !prefersReduced;
+let sTarget=window.scrollY, sCur=window.scrollY;
+function smoothGo(y){
+  y=Math.max(0,Math.min(y,document.documentElement.scrollHeight-window.innerHeight));
+  if(!smoothOn){ window.scrollTo(0,y); return; }
+  sTarget=y;
+}
+if(smoothOn){
+  document.documentElement.style.scrollBehavior='auto';
+  window.addEventListener('wheel',e=>{ e.preventDefault(); sTarget+=e.deltaY; sTarget=Math.max(0,Math.min(sTarget,document.documentElement.scrollHeight-window.innerHeight)); },{passive:false});
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    const id=a.getAttribute('href').slice(1);
+    if(!id || !document.getElementById(id)) return;
+    a.addEventListener('click',e=>{ e.preventDefault(); const el=document.getElementById(id); smoothGo(el.getBoundingClientRect().top+window.scrollY-70); });
+  });
+  // Alleen het muiswiel stuurt sTarget bij — toetsenbord (pijltjes/Page Up/
+  // Down/Home/End) en scrollbar-slepen doen dat niet, waardoor scrollLoop
+  // die pogingen elk frame terugdraaide naar het oude wiel-doel. Fix: als de
+  // werkelijke scrollpositie afwijkt van wat wij zelf net hebben gezet, komt
+  // die afwijking van iets anders (toetsenbord/scrollbar/touchpad) — dan
+  // nemen we die positie meteen over als nieuw doel.
+  let sLastSet=sCur;
+  window.addEventListener('scroll',()=>{ if(Math.abs(window.scrollY-sLastSet)>1){ sTarget=window.scrollY; sCur=window.scrollY; } });
+  (function scrollLoop(){ sCur+=(sTarget-sCur)*0.12; if(Math.abs(sCur-sTarget)<0.5)sCur=sTarget; window.scrollTo(0,sCur); sLastSet=sCur; requestAnimationFrame(scrollLoop); })();
+}
+
+// Kaart-tilt + muisgloed
+if(pointerFine && hoverCapable && !prefersReduced){
+  document.querySelectorAll('.feature,.step,.price-card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+      card.style.setProperty('--mx',(x*100)+'%');
+      card.style.setProperty('--my',(y*100)+'%');
+      card.style.transform='perspective(800px) rotateX('+((y-0.5)*-5)+'deg) rotateY('+((x-0.5)*5)+'deg) translateY(-3px)';
+    });
+    card.addEventListener('mouseleave',()=>{ card.style.transform=''; });
+  });
+}
+
+// Scroll-reveal
+if(!prefersReduced && 'IntersectionObserver' in window){
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+}else{
+  document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+}
+
+// Teller-animatie
+function formatCount(val,dec){ const s=val.toFixed(dec); return dec>0 ? s.replace('.',',') : s; }
+function animCount(el){
+  const target=parseFloat(el.dataset.count);
+  const dec=parseInt(el.dataset.dec||0,10);
+  const dur=1300; const t0=performance.now();
+  function tick(now){ const p=Math.min((now-t0)/dur,1); const eased=1-Math.pow(1-p,3); el.textContent=formatCount(target*eased,dec); if(p<1) requestAnimationFrame(tick); }
+  requestAnimationFrame(tick);
+}
+const counters=document.querySelectorAll('.count');
+if(!prefersReduced && 'IntersectionObserver' in window){
+  const cObs=new IntersectionObserver(entries=>{ entries.forEach(e=>{ if(e.isIntersecting){ animCount(e.target); cObs.unobserve(e.target); } }); },{threshold:.5});
+  counters.forEach(el=>cObs.observe(el));
+}else{ counters.forEach(el=>el.textContent=formatCount(parseFloat(el.dataset.count),parseInt(el.dataset.dec||0,10))); }
+
+// ===== Inhoudelijke functies (ongewijzigd) =====
+function scrollTo2(id){ const el=document.getElementById(id); if(el) smoothGo(el.getBoundingClientRect().top+window.scrollY-70); }
+function openLogin(){ document.getElementById('loginModal').classList.add('show'); toonInlogTab(); }
+// Was voorheen een placeholder-tekst die verdween zodra iemand ging typen,
+// en nooit bijgewerkt werd bij een tweede, andere pakketkeuze — een
+// gebruiker die van gedachten veranderde zag dus geen (of de verkeerde)
+// bevestiging van wat er echt zou worden aangevraagd.
+function regPakketBadgeBijwerken(){
+  const el=document.getElementById('regPakketBadge'); if(!el) return;
+  if(gekozenPakket){ el.style.display='block'; el.textContent='Gekozen pakket: '+gekozenPakket.charAt(0).toUpperCase()+gekozenPakket.slice(1); }
+  else{ el.style.display='none'; }
+}
+function toggleMobileNav(){
+  const burger=document.getElementById('navBurger');
+  const open=burger.classList.toggle('open');
+  document.getElementById('navMobileMenu').classList.toggle('open', open);
+  burger.setAttribute('aria-expanded', open?'true':'false');
+}
+function closeMobileNav(){
+  document.getElementById('navBurger').classList.remove('open');
+  document.getElementById('navMobileMenu').classList.remove('open');
+  document.getElementById('navBurger').setAttribute('aria-expanded','false');
+}
+// Menu sluiten zodra het scherm weer breed genoeg is voor de gewone balk
+// (anders kan het openstaand blijven staan na bijv. schermrotatie).
+window.addEventListener('resize', ()=>{ if(window.innerWidth>900) closeMobileNav(); });
+// Onthoudt welk pakket iemand op de prijzenpagina koos, zodat dat meegaat
+// naar de registratie (zie doRegister) — ging anders verloren, waardoor
+// iedereen zonder pakket werd aangemaakt.
+let gekozenPakket=null;
+function openRegisterMetPakket(pakket){
+  gekozenPakket=pakket.toLowerCase(); // 'start' / 'beheer' / 'bedrijf' — moet matchen met pakket_type in de database
+  document.getElementById('loginModal').classList.add('show');
+  toonRegistreerTab();
+}
+// Foutmeldingen van een vorige poging bleven eerder staan bij het opnieuw
+// openen van de modal (bijv. na een mislukte registratie, modal sluiten, en
+// later via een andere prijskaart terugkomen) — leek dan een fout in de
+// nieuwe poging terwijl er nog niets was ingevuld. Nu bij elke tab-wissel
+// gewist, en de pakket-badge bijgewerkt.
+// Eén centrale helper voor alle 4 mogelijke schermen in deze modal (inloggen,
+// registreren, wachtwoord vergeten, nieuw wachtwoord instellen) — voorkomt
+// dat twee schermen per ongeluk tegelijk zichtbaar staan.
+function pvsToonAuthView(view){
+  ['loginView','registerView','wachtwoordVergetenView','nieuwWachtwoordView','verificatieView'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display = (id===view) ? 'block' : 'none';
+  });
+  document.getElementById('tabInloggen').classList.toggle('active', view==='loginView');
+  document.getElementById('tabRegistreren').classList.toggle('active', view==='registerView'||view==='verificatieView');
+}
+function toonInlogTab(){ pvsToonAuthView('loginView'); loginMsg(''); }
+function toonRegistreerTab(){ pvsToonAuthView('registerView'); registerMsg(''); regPakketBadgeBijwerken(); }
+function toonWachtwoordVergetenView(){ pvsToonAuthView('wachtwoordVergetenView'); wachtwoordVergetenMsg(''); const e=document.getElementById('wvEmail'); if(e && !e.value) e.value=document.getElementById('loginEmail').value; }
+function pvsTogglePw(id,btn){
+  const el=document.getElementById(id); if(!el) return;
+  const tonen = el.type==='password';
+  el.type = tonen ? 'text' : 'password';
+  btn.textContent = tonen ? '🙈' : '👁';
+  btn.setAttribute('aria-label', tonen ? 'Wachtwoord verbergen' : 'Wachtwoord tonen');
+}
+
+// ===== Inloggen & registreren — echte koppeling met Supabase =====
+const PVS_SUPABASE_URL='https://svhvzjxctxbeunnakivw.supabase.co';
+const PVS_SUPABASE_KEY='sb_publishable_hvmiv_U-vNVQGY8W1c2DtA_XN3QaDye';
+let _pvsSbClient=null;
+function pvsSbClient(){ if(!_pvsSbClient){ if(typeof window.supabase==='undefined') throw new Error('Kan geen verbinding maken met de server. Controleer uw internetverbinding en probeer opnieuw.'); _pvsSbClient=window.supabase.createClient(PVS_SUPABASE_URL,PVS_SUPABASE_KEY); } return _pvsSbClient; }
+function metTimeout(promise,ms,boodschap){ return Promise.race([promise,new Promise((_,rej)=>setTimeout(()=>rej(new Error(boodschap||'Time-out')),ms))]); }
+function loginVertaalFout(e){
+  const m=(e&&e.message)||'';
+  if(/invalid login credentials/i.test(m)) return 'E-mail of wachtwoord onjuist.';
+  if(/already registered|already exists|duplicate/i.test(m)) return 'Dit e-mailadres heeft al een account. Log in plaats daarvan in.';
+  if(/Time-out|fetch|network|Failed to fetch/i.test(m)) return 'Kan geen verbinding maken met de server. Controleer uw internetverbinding en probeer opnieuw.';
+  return m || 'Er ging iets mis. Probeer het opnieuw.';
+}
+function toonBericht(elId,tekst,ok){ const el=document.getElementById(elId); if(!tekst){ el.style.display='none'; return; } el.style.display='block'; el.textContent=tekst; el.classList.toggle('ok', !!ok); }
+// Er waren geen <form>-tags (bewust, om een paginaherlaadbeurt bij verkeerd
+// gebruik te voorkomen), maar daardoor deed Enter in een wachtwoordveld
+// niets — een zeer gangbare gewoonte om in te loggen/registreren.
+document.getElementById('loginModal').addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ document.getElementById('loginModal').classList.remove('show'); return; }
+  if(e.key!=='Enter') return;
+  if(document.getElementById('loginView').style.display!=='none') doLogin();
+  else if(document.getElementById('wachtwoordVergetenView').style.display!=='none') wachtwoordVergetenVersturen();
+  else if(document.getElementById('nieuwWachtwoordView').style.display!=='none') nieuwWachtwoordOpslaan();
+  else if(document.getElementById('verificatieView').style.display!=='none') verificatieCodeControleren();
+  else doRegister();
+});
+function loginMsg(tekst){ toonBericht('loginMsg', tekst, false); }
+function registerMsg(tekst,ok){ toonBericht('registerMsg', tekst, ok); }
+function wachtwoordVergetenMsg(tekst,ok){ toonBericht('wachtwoordVergetenMsg', tekst, ok); }
+function nieuwWachtwoordMsg(tekst,ok){ toonBericht('nieuwWachtwoordMsg', tekst, ok); }
+
+// ===== Wachtwoord vergeten / nieuw wachtwoord instellen =====
+// Supabase stuurt een mail met een link die terugkomt op déze pagina, met
+// een herstel-sessie in de URL. supabase-js herkent dat vanzelf
+// (detectSessionInUrl) en vuurt de 'PASSWORD_RECOVERY'-gebeurtenis — die
+// vangen we hieronder op om automatisch het "nieuw wachtwoord"-scherm te
+// openen, zonder dat de gebruiker ergens hoeft in te loggen met het oude
+// (vergeten) wachtwoord.
+async function wachtwoordVergetenVersturen(){
+  const email=document.getElementById('wvEmail').value.trim();
+  if(!email){ wachtwoordVergetenMsg('Vul uw e-mailadres in.'); return; }
+  const btn=document.getElementById('wvBtn');
+  btn.disabled=true; btn.textContent='Versturen…';
+  try{
+    const {error}=await metTimeout(pvsSbClient().auth.resetPasswordForEmail(email, {redirectTo: window.location.origin+window.location.pathname}), 12000, 'Geen reactie van de server.');
+    if(error) throw error;
+    wachtwoordVergetenMsg('Mail verstuurd! Bekijk uw inbox (en spamfolder) voor de link om een nieuw wachtwoord in te stellen.', true);
+  }catch(e){
+    wachtwoordVergetenMsg(loginVertaalFout(e));
+  }finally{
+    btn.disabled=false; btn.textContent='Resetlink versturen →';
+  }
+}
+async function nieuwWachtwoordOpslaan(){
+  const pw=document.getElementById('nwPw').value;
+  if(!pw||pw.length<6){ nieuwWachtwoordMsg('Kies een wachtwoord van minimaal 6 tekens.'); return; }
+  const btn=document.getElementById('nwBtn');
+  btn.disabled=true; btn.textContent='Opslaan…';
+  try{
+    const {error}=await metTimeout(pvsSbClient().auth.updateUser({password:pw}), 12000, 'Geen reactie van de server.');
+    if(error) throw error;
+    nieuwWachtwoordMsg('Wachtwoord gewijzigd! U bent nu ingelogd — u wordt doorgestuurd naar uw portaal…', true);
+    setTimeout(()=>{ window.location.href='vastgoedos-platform.html'; }, 1800);
+  }catch(e){
+    nieuwWachtwoordMsg(loginVertaalFout(e));
+    btn.disabled=false; btn.textContent='Wachtwoord opslaan →';
+  }
+}
+// try/catch: als de Supabase-CDN niet laadde (netwerkprobleem), toont de
+// laadwaarschuwing bovenin toch al een foutmelding — een onafgevangen fout
+// hier zou verder script-initialisatie in dit blok stilzwijgend breken.
+try{
+  pvsSbClient().auth.onAuthStateChange((event)=>{
+    if(event==='PASSWORD_RECOVERY'){
+      document.getElementById('loginModal').classList.add('show');
+      pvsToonAuthView('nieuwWachtwoordView');
+    }
+  });
+}catch(e){ console.error('Kon niet luisteren naar wachtwoordherstel', e); }
+
+// ===== Contactformulier — echte opslag (zie backend/schema_008_contact.sql) =====
+// Was voorheen puur een alert() zonder enige opslag of validatie — elk
+// bericht van een geïnteresseerde bezoeker verdween spoorloos, ook bij drie
+// lege velden.
+async function contactVerstuur(){
+  const naam=document.getElementById('contactNaam').value.trim();
+  const email=document.getElementById('contactEmail').value.trim();
+  const bericht=document.getElementById('contactBericht').value.trim();
+  const msgEl=document.getElementById('contactMsg');
+  const toon=(tekst)=>{ msgEl.style.display='block'; msgEl.textContent=tekst; };
+  if(!naam||!bericht){ toon('Vul minimaal uw naam en een bericht in.'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ toon('Vul een geldig e-mailadres in.'); return; }
+  const btn=document.getElementById('contactBtn');
+  btn.disabled=true; btn.textContent='Versturen…';
+  try{
+    const {error}=await metTimeout(pvsSbClient().from('contact_berichten').insert({naam,email,bericht}),12000,'Geen reactie van de server.');
+    if(error) throw error;
+    toon('Bedankt! We nemen zo snel mogelijk contact met u op.');
+    document.getElementById('contactNaam').value='';
+    document.getElementById('contactEmail').value='';
+    document.getElementById('contactBericht').value='';
+  }catch(e){
+    console.error('Contactbericht versturen mislukt', e);
+    toon('Versturen is niet gelukt. Probeer het later opnieuw, of mail rechtstreeks naar info@ankova.nl.');
+  }finally{
+    btn.disabled=false; btn.textContent='Verstuur bericht';
+  }
+}
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pw=document.getElementById('loginPw').value;
+  if(!email||!pw){ loginMsg('Vul uw e-mailadres en wachtwoord in.'); return; }
+  const btn=document.getElementById('loginBtn'); btn.disabled=true; btn.textContent='Bezig…'; loginMsg('');
+  try{ const {data,error}=await metTimeout(pvsSbClient().auth.signInWithPassword({email,password:pw}),12000,'Geen reactie van de server.'); if(error){ loginMsg(loginVertaalFout(error)); return; } window.location.href='vastgoedos-platform.html'; }
+  catch(e){ loginMsg(loginVertaalFout(e)); }
+  finally{ btn.disabled=false; btn.textContent='Inloggen →'; }
+}
+async function doRegister(){
+  const naam=document.getElementById('regNaam').value.trim();
+  const bedrijf=document.getElementById('regBedrijf').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const pw=document.getElementById('regPw').value;
+  if(!email||!pw){ registerMsg('Vul uw e-mailadres en wachtwoord in.'); return; }
+  if(pw.length<6){ registerMsg('Wachtwoord moet minimaal 6 tekens zijn.'); return; }
+  const akkoordEl=document.getElementById('regAkkoord');
+  if(!akkoordEl||!akkoordEl.checked){ registerMsg('U moet akkoord gaan met de algemene voorwaarden, het privacybeleid en de verwerkersovereenkomst om door te gaan.'); return; }
+  const btn=document.getElementById('registerBtn'); btn.disabled=true; btn.textContent='Bezig…'; registerMsg('');
+  try{ const {data,error}=await metTimeout(pvsSbClient().auth.signUp({email,password:pw,options:{data:{bedrijfsnaam:bedrijf||undefined, naam:naam||undefined, pakket:gekozenPakket||undefined, akkoord_voorwaarden:true, akkoord_datum:new Date().toISOString(), akkoord_versie:'2026-08'}}}),12000,'Geen reactie van de server.'); if(error){ registerMsg(loginVertaalFout(error)); return; } if(data.session){ window.location.href='vastgoedos-platform.html'; } else {
+      // Geen sessie terug = e-mailbevestiging vereist. In plaats van de
+      // gebruiker naar zijn mail te sturen om op een link te klikken (en
+      // dan terug hierheen om alsnog in te loggen), vragen we meteen de
+      // 6-cijferige verificatiecode uit diezelfde mail — sneller en
+      // duidelijker, en bevestigt meteen dat het e-mailadres klopt.
+      _verificatieEmail=email;
+      document.getElementById('verificatieEmailTekst').textContent=email;
+      pvsToonAuthView('verificatieView'); verificatieMsg('');
+    } }
+  catch(e){ registerMsg(loginVertaalFout(e)); }
+  finally{ btn.disabled=false; btn.textContent='Account aanmaken →'; }
+}
+let _verificatieEmail=null;
+function verificatieMsg(tekst,ok){ toonBericht('verificatieMsg', tekst, ok); }
+async function verificatieCodeControleren(){
+  const code=document.getElementById('verificatieCode').value.trim();
+  if(!code||code.length<6){ verificatieMsg('Vul de volledige 6-cijferige code in.'); return; }
+  if(!_verificatieEmail){ verificatieMsg('Er ging iets mis — start de registratie opnieuw.'); return; }
+  const btn=document.getElementById('verificatieBtn'); btn.disabled=true; btn.textContent='Controleren…';
+  try{
+    const {data,error}=await metTimeout(pvsSbClient().auth.verifyOtp({email:_verificatieEmail, token:code, type:'signup'}),12000,'Geen reactie van de server.');
+    if(error){ verificatieMsg(loginVertaalFout(error)); return; }
+    if(data.session){ window.location.href='vastgoedos-platform.html'; }
+    else { verificatieMsg('E-mail bevestigd! U kunt nu inloggen.', true); setTimeout(()=>toonInlogTab(),1800); }
+  }catch(e){ verificatieMsg(loginVertaalFout(e)); }
+  finally{ btn.disabled=false; btn.textContent='Bevestigen →'; }
+}
+async function verificatieCodeOpnieuw(){
+  if(!_verificatieEmail) return;
+  try{
+    const {error}=await metTimeout(pvsSbClient().auth.resend({type:'signup', email:_verificatieEmail}),12000,'Geen reactie van de server.');
+    if(error){ verificatieMsg(loginVertaalFout(error)); return; }
+    verificatieMsg('Nieuwe code verstuurd — controleer uw inbox (en spamfolder).', true);
+  }catch(e){ verificatieMsg(loginVertaalFout(e)); }
+}
+function quizKies(rol){ document.getElementById('quiz-step1').style.display='none'; document.getElementById('quiz-'+rol).style.display='block'; }
+function quizReset(){ document.querySelectorAll('.quiz-result').forEach(x=>x.style.display='none'); document.getElementById('quiz-step1').style.display='block'; }
+const demoVerhuurders=['Amsterdam Vastgoedbeheer','Van der Meer Beheer BV','Grachten Vastgoed','Noord-Holland Verhuur','Beheergroep Zuid'];
+function zoekVerhuurder(){
+  const q=document.getElementById('huurderZoek').value.toLowerCase().trim();
+  const res=document.getElementById('zoekResultaten');
+  if(!q){res.innerHTML='';return;}
+  const hits=demoVerhuurders.filter(v=>v.toLowerCase().includes(q));
+  res.innerHTML=hits.length?hits.map(v=>`<div class="zoek-result" onclick="alert('Toegangsverzoek verstuurd naar ${v}!\\n\\nZodra uw verhuurder dit goedkeurt, ontvangt u een e-mail met uw inloggegevens. (demo)')"><span>🏢 ${v}</span><span style="color:var(--brass-deep);font-weight:600;font-size:12px">Toegang aanvragen →</span></div>`).join(''):'<div style="font-size:13px;color:var(--muted);padding:8px 2px">Geen verhuurder gevonden — vraag uw verhuurder om een uitnodigingslink.</div>';
+}
+function cookieKeuze(alles){ document.getElementById('cookieBanner').style.display='none'; try{ localStorage.setItem('pvsvast_cookiekeuze', alles?'alles':'functioneel'); }catch(e){} }
+(function(){ try{ if(localStorage.getItem('pvsvast_cookiekeuze')){ const b=document.getElementById('cookieBanner'); if(b) b.style.display='none'; } }catch(e){} })();
+</script>
+</body>
+</html>
