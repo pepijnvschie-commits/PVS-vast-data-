@@ -151,8 +151,9 @@ nav:not(.scrolled) .nav-burger.open span{background:transparent;}
    blijft de donkerblauwe achtergrond staan en blijft alles leesbaar. */
 .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;overflow:hidden;padding:104px 0 140px;background:var(--ink-4);}
 .hero-media{position:absolute;inset:0;z-index:0;}
-.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease-in-out,transform 9s linear;transform:scale(1.06);}
-.hero-slide.on{opacity:1;transform:scale(1);}
+.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease-in-out;transform:scale(1.04);}
+.hero-slide.on{opacity:1;animation:kenBurns 16s ease-out forwards;}
+@keyframes kenBurns{from{transform:scale(1.04);}to{transform:scale(1.16);}}
 .hero-scrim{position:absolute;inset:0;z-index:1;background:
   linear-gradient(180deg,rgba(10,22,34,.72) 0%,rgba(10,22,34,.45) 38%,rgba(10,22,34,.62) 72%,rgba(10,22,34,.92) 100%),
   radial-gradient(80% 60% at 50% 45%,rgba(10,22,34,.15),rgba(10,22,34,.6));}
@@ -200,10 +201,17 @@ body.ready .entrance-card{opacity:1;transform:none;}
 /* onderste strip in de hero: fotokiezer links, status rechts */
 .hero-foot{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;max-width:1180px;margin:0 auto;padding:34px 26px 24px;}
 .hero-switch{display:flex;flex-direction:column;gap:8px;text-align:left;}
-.hero-switch button{display:flex;align-items:baseline;gap:10px;background:none;color:#fff;font-family:var(--body);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;opacity:.55;padding:2px 0;transition:opacity .2s var(--ease),transform .2s var(--ease);}
+.hero-switch button{position:relative;display:flex;align-items:baseline;gap:10px;background:none;color:#fff;font-family:var(--body);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;opacity:.55;padding:2px 0;transition:opacity .2s var(--ease),transform .2s var(--ease);}
 .hero-switch button:hover{opacity:.8;transform:translateX(4px);}
 .hero-switch button.on{opacity:1;}
+.hero-switch button::after{content:'';position:absolute;left:0;bottom:-1px;height:1.5px;width:0;background:rgba(255,255,255,.8);}
+.hero-switch button.on::after{animation:switchProgress 6.5s linear forwards;}
+@keyframes switchProgress{from{width:0;}to{width:100%;}}
 .hero-switch button i{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;opacity:.75;}
+.hero-cue{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:9px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.55);padding-bottom:2px;}
+.hero-cue .lijn{position:relative;width:1px;height:34px;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);overflow:hidden;}
+.hero-cue .lijn::after{content:'';position:absolute;left:-1.5px;top:-12px;width:4px;height:12px;border-radius:2px;background:#8FC4F2;animation:cueVal 1.9s ease-in-out infinite;}
+@keyframes cueVal{0%{transform:translateY(0);opacity:0;}25%{opacity:1;}100%{transform:translateY(46px);opacity:0;}}
 .hero-status{display:inline-flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.85);}
 .hero-status .dot{width:7px;height:7px;border-radius:50%;background:#8FC4F2;box-shadow:0 0 12px 2px rgba(143,196,242,.75);animation:dotPulse 1.6s infinite;}
 @keyframes dotPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.45;transform:scale(1.45);}}
@@ -215,6 +223,7 @@ body.ready .entrance-foot{opacity:1;transform:none;}
      de statistiekenkaart maakt het verhaal al concreet. */
   .hero-meta{display:none;}
   .hero-foot{position:static;padding:34px 26px 0;flex-direction:column;align-items:flex-start;gap:18px;}
+  .hero-cue{display:none;}
 }
 
 /* ---------- Marquee (licht lint) ---------- */
@@ -489,6 +498,7 @@ footer a:hover{color:var(--brass);}
       <button type="button" onclick="kiesSlide(1)"><i>02 /</i>Stadsstraat</button>
       <button type="button" onclick="kiesSlide(2)"><i>03 /</i>Kantoortorens</button>
     </div>
+    <div class="hero-cue" aria-hidden="true"><span class="lijn"></span>scroll</div>
     <div class="hero-status"><span class="dot"></span>14 dagen gratis uitproberen — maandelijks opzegbaar</div>
   </div>
 </header>
