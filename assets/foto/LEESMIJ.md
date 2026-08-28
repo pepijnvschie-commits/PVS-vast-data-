@@ -1,12 +1,13 @@
 # Foto's van de website
 
-De bestanden in deze map zijn **tijdelijke placeholders**. Zet hier uw eigen
-foto's neer om ze op de site te tonen — er hoeft niets in de code gewijzigd te
-worden zolang u dezelfde bestandsnamen aanhoudt.
+Sinds de laatste versie zitten er **voorbeeldbeelden ingebouwd in de pagina
+zelf** — het HTML-bestand werkt dus ook los van deze map. Uw eigen foto's
+tonen is nu niets meer dan: **zet ze in deze map met de juiste naam**. Er
+hoeft geen letter code meer gewijzigd te worden.
 
-## Wat komt waar?
+## Welke naam hoort waar?
 
-| Bestand | Waar het staat op de site | Aanbevolen formaat |
+| Bestandsnaam | Waar het staat op de site | Aanbevolen formaat |
 |---|---|---|
 | `hero-1.jpg` | Eerste foto bovenaan (knop "01 / Grachtenpanden") | liggend, min. 1920 × 1280 |
 | `hero-2.jpg` | Tweede foto bovenaan (knop "02 / Stadsstraat") | liggend, min. 1920 × 1280 |
@@ -17,24 +18,17 @@ worden zolang u dezelfde bestandsnamen aanhoudt.
 | `overzicht.jpg` | Beeld naast "Eén portaal. Elke relatie. Elk pand." | staand, min. 900 × 1200 |
 | `contact.jpg` | Beeld naast het contactformulier | staand, min. 900 × 1200 |
 
-## Zo vervangt u een foto
-
-1. Zet uw foto in deze map met precies de naam uit de tabel, bijvoorbeeld
-   `hero-1.jpg`.
-2. Open `ankova-nieuw.html` en zoek op `assets/foto/` — vervang bij die regel
-   de extensie `.svg` door `.jpg` (of `.webp`, wat u gebruikt).
-3. Verwijder daarna gerust het bijbehorende `.svg`-placeholderbestand.
-
-Gebruikt u dezelfde extensie voor alle foto's, dan kunt u in stap 2 in één keer
-alle voorkomens van `.svg` vervangen door `.jpg`.
+Let op: de naam moet **exact** kloppen, inclusief de extensie `.jpg`
+(kleine letters). Gebruikt u liever `.png` of `.webp`, zoek dan in
+`ankova-nieuw.html` op bijvoorbeeld `hero-1.jpg` en pas daar de extensie aan.
 
 ## Tips
 
-- **Bestandsgrootte:** houd elke foto onder ~400 kB (exporteer als JPG met
-  kwaliteit 70–80, of gebruik WebP). Anders laadt de pagina traag op mobiel.
-- **Bovenste foto's:** de tekst staat in het midden over de foto heen. Kies
-  foto's waar het midden rustig is (lucht, gevel) en niet te druk.
+- **Bestandsgrootte:** houd elke foto onder ~400 kB (JPG-kwaliteit 70–80 of
+  WebP), anders laadt de pagina traag op mobiel.
+- **Bovenste foto's:** de tekst staat in het midden over de foto heen; kies
+  beelden met een rustig midden (lucht, gevel).
 - **Donker of licht:** over elke foto ligt een donkere sluier zodat de witte
-  tekst leesbaar blijft. Lichte foto's werken dus ook prima.
-- **Laadt een foto niet?** Dan blijft de donkerblauwe achtergrond staan en
-  blijft de pagina gewoon leesbaar — er breekt niets.
+  tekst leesbaar blijft — lichte foto's kunnen dus ook.
+- De `.svg`-bestanden in deze map zijn de losse voorbeeldbeelden; ze mogen
+  blijven staan of weg, de pagina gebruikt ze niet meer.
