@@ -276,7 +276,7 @@ body.ready .entrance-foot{opacity:1;transform:none;}
 .photo-card>*{position:relative;z-index:1;}
 .photo-card h3{font-size:26px;font-weight:400;margin-bottom:6px;}
 .photo-card p{font-size:13.5px;color:rgba(255,255,255,.82);}
-.photo-card .tag{position:absolute;top:18px;left:18px;z-index:2;font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.14);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);padding:5px 12px;border-radius:100px;}
+.photo-card .tag{position:absolute;top:18px;left:18px;z-index:2;font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#fff;background:rgba(10,22,34,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.28);padding:5px 12px;border-radius:100px;}
 .feed{display:grid;gap:8px;margin-top:18px;}
 .feed-row{display:flex;gap:9px;align-items:center;font-size:12.5px;background:rgba(255,255,255,.06);border:1px solid var(--line-dark);border-radius:10px;padding:10px 12px;color:#EAF1F8;}
 .feed-row .t{font-family:var(--mono);font-size:10.5px;color:var(--muted-dark);margin-left:auto;flex-shrink:0;}
@@ -288,10 +288,10 @@ body.ready .entrance-foot{opacity:1;transform:none;}
 
 /* ---------- Parallax-deler ---------- */
 .parallax{min-height:52vh;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;background:#0E1114;background-size:cover;background-position:center;position:relative;}
-.parallax::before{content:'';position:absolute;inset:0;background:rgba(14,17,20,.55);}
+.parallax::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,22,34,.62),rgba(10,22,34,.5) 45%,rgba(10,22,34,.68));}
 .parallax .inner{position:relative;z-index:1;max-width:760px;padding:0 26px;}
-.parallax .label{font-family:var(--mono);font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--brass);margin-bottom:18px;}
-.parallax h2{font-size:clamp(32px,4.6vw,54px);font-weight:400;letter-spacing:-1px;line-height:1.06;margin-bottom:14px;}
+.parallax .label{font-family:var(--mono);font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#BEDCF7;text-shadow:0 1px 12px rgba(8,15,22,.7);margin-bottom:18px;}
+.parallax h2{font-size:clamp(32px,4.6vw,54px);font-weight:400;letter-spacing:-1px;line-height:1.06;margin-bottom:14px;text-shadow:0 2px 24px rgba(8,15,22,.55);}
 .parallax h2 em{font-style:italic;color:var(--brass);}
 .parallax p{color:rgba(255,255,255,.85);font-size:16px;}
 @media(min-width:901px){.parallax{background-attachment:fixed;}}
