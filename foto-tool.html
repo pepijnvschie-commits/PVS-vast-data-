@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ankova — foto's klaarmaken</title>
+<style>
+/* Dit hulpprogramma werkt volledig in uw eigen browser: er wordt niets
+   geüpload of verstuurd. Foto's worden bijgesneden, verkleind en met de
+   juiste bestandsnaam opgeslagen. */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:#F7FAFD;color:#16324A;line-height:1.6;padding:32px 20px 80px}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-family:Georgia,serif;font-weight:400;font-size:34px;letter-spacing:-.5px;margin-bottom:8px}
+.intro{color:#5A6B7C;max-width:640px;margin-bottom:8px}
+.let-op{background:#E3EEF9;border:1px solid #C6DDF2;border-radius:12px;padding:14px 18px;font-size:14px;color:#1F4E79;margin:20px 0 28px;max-width:760px}
+.rooster{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.vak{background:#fff;border:1.5px dashed #C9D9E8;border-radius:16px;padding:16px;transition:border-color .18s,box-shadow .18s}
+.vak.sleep{border-color:#3B82C4;background:#F2F8FE;box-shadow:0 8px 24px rgba(15,34,51,.1)}
+.vak.klaar{border-style:solid;border-color:#3B82C4}
+.vak h3{font-size:14px;font-weight:600;margin-bottom:2px}
+.vak .waar{font-size:12px;color:#5A6B7C;margin-bottom:4px}
+.vak .maat{font-family:ui-monospace,monospace;font-size:11px;color:#7A8B9C;margin-bottom:12px}
+.voorbeeld{position:relative;width:100%;aspect-ratio:3/2;border-radius:10px;overflow:hidden;background:#EDF3F9;display:flex;align-items:center;justify-content:center;color:#8FA3B6;font-size:12.5px;text-align:center;padding:12px}
+.voorbeeld.staand{aspect-ratio:3/4}
+.voorbeeld img{width:100%;height:100%;object-fit:cover;display:block}
+.knoppen{display:flex;gap:8px;margin-top:12px}
+button{font-family:inherit;font-size:13px;font-weight:600;border:none;border-radius:9px;padding:9px 14px;cursor:pointer;transition:background .16s,transform .16s}
+.kies{background:#EDF3F9;color:#16324A;flex:1}
+.kies:hover{background:#DCEAF7}
+.opslaan{background:#16324A;color:#fff;flex:1}
+.opslaan:hover{background:#2A4A68;transform:translateY(-1px)}
+.opslaan:disabled{background:#C9D9E8;cursor:not-allowed;transform:none}
+input[type=file]{display:none}
+.gewicht{font-size:11px;color:#5A6B7C;margin-top:8px;min-height:16px}
+footer{margin-top:40px;font-size:13px;color:#5A6B7C;max-width:760px}
+footer code{background:#EDF3F9;padding:2px 6px;border-radius:5px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Foto's klaarmaken voor de site</h1>
+  <p class="intro">Sleep per vak een foto naar binnen (of klik om er een te kiezen). De foto wordt automatisch
+  bijgesneden op de juiste verhouding, verkleind en als JPG opgeslagen met de naam die de website verwacht.</p>
+
+  <div class="let-op"><strong>Uw foto's blijven van u.</strong> Dit hulpprogramma werkt volledig in uw eigen browser —
+  er wordt niets geüpload, verstuurd of bewaard.</div>
+
+  <div class="rooster" id="rooster"></div>
+
+  <footer>
+    <p><strong>Daarna:</strong> zet alle opgeslagen bestanden in de map <code>assets/foto/</code>, naast
+    <code>ankova-nieuw.html</code>. Ververs de pagina en ze staan erin — er hoeft niets in de code gewijzigd te worden.</p>
+  </footer>
+</div>
+
+<script>
+const VAKKEN = [
+  { naam:'hero-1',       waar:'Bovenaan, knop "01 / Grachtenpanden"',              b:1920, h:1280 },
+  { naam:'hero-2',       waar:'Bovenaan, knop "02 / Stadsstraat"',                 b:1920, h:1280 },
+  { naam:'hero-3',       waar:'Bovenaan, knop "03 / Kantoortorens"',               b:1920, h:1280 },
+  { naam:'portefeuille', waar:'Kaart "Van wonen tot commercieel"',                 b:900,  h:1200 },
+  { naam:'ai-onderhoud', waar:'Brede kaart "De AI regelt het onderhoud"',          b:1600, h:1000 },
+  { naam:'parallax',     waar:'Tussenbeeld "Vakmensen worden ingeschakeld"',       b:1920, h:1080 },
+  { naam:'overzicht',    waar:'Naast "Eén portaal. Elke relatie. Elk pand."',      b:900,  h:1200 },
+  { naam:'contact',      waar:'Naast het contactformulier',                        b:900,  h:1200 },
+];
+
+const rooster = document.getElementById('rooster');
+
+VAKKEN.forEach(vak => {
+  const staand = vak.h > vak.b;
+  const el = document.createElement('div');
+  el.className = 'vak';
+  el.innerHTML = `
+    <h3>${vak.naam}.jpg</h3>
+    <div class="waar">${vak.waar}</div>
+    <div class="maat">${vak.b} x ${vak.h} px</div>
+    <div class="voorbeeld ${staand ? 'staand' : ''}"><span>Sleep hier een foto<br>of klik op Kiezen</span></div>
+    <div class="knoppen">
+      <button class="kies">Kiezen</button>
+      <button class="opslaan" disabled>Opslaan</button>
+    </div>
+    <div class="gewicht"></div>
+    <input type="file" accept="image/*">
+  `;
+  rooster.appendChild(el);
+
+  const voorbeeld = el.querySelector('.voorbeeld');
+  const invoer    = el.querySelector('input');
+  const opslaanBtn= el.querySelector('.opslaan');
+  const gewicht   = el.querySelector('.gewicht');
+  let blob = null;
+
+  el.querySelector('.kies').onclick = () => invoer.click();
+  invoer.onchange = e => { if (e.target.files[0]) verwerk(e.target.files[0]); };
+
+  // slepen en loslaten
+  ['dragenter','dragover'].forEach(t => el.addEventListener(t, e => {
+    e.preventDefault(); el.classList.add('sleep');
+  }));
+  ['dragleave','drop'].forEach(t => el.addEventListener(t, e => {
+    e.preventDefault(); el.classList.remove('sleep');
+  }));
+  el.addEventListener('drop', e => {
+    const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
+    if (f) verwerk(f);
+  });
+
+  function verwerk(bestand) {
+    const img = new Image();
+    img.onload = () => {
+      // Middenuitsnede op de juiste verhouding, daarna verkleinen naar
+      // het doelformaat — zo wordt de foto nooit uitgerekt.
+      const doelVerh = vak.b / vak.h;
+      const bronVerh = img.width / img.height;
+      let sx = 0, sy = 0, sb = img.width, sh = img.height;
+      if (bronVerh > doelVerh) { sb = img.height * doelVerh; sx = (img.width - sb) / 2; }
+      else                     { sh = img.width / doelVerh;  sy = (img.height - sh) / 2; }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = vak.b; canvas.height = vak.h;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, sx, sy, sb, sh, 0, 0, vak.b, vak.h);
+
+      // kwaliteit stapsgewijs verlagen tot het bestand onder ~400 kB blijft
+      (function comprimeer(kwaliteit) {
+        canvas.toBlob(b => {
+          if (b.size > 400 * 1024 && kwaliteit > 0.5) return comprimeer(kwaliteit - 0.08);
+          blob = b;
+          voorbeeld.innerHTML = '';
+          const v = new Image(); v.src = URL.createObjectURL(b); voorbeeld.appendChild(v);
+          gewicht.textContent = Math.round(b.size / 1024) + ' kB — klaar om op te slaan';
+          opslaanBtn.disabled = false;
+          el.classList.add('klaar');
+        }, 'image/jpeg', kwaliteit);
+      })(0.82);
+    };
+    img.onerror = () => { gewicht.textContent = 'Dit bestand kon niet gelezen worden.'; };
+    img.src = URL.createObjectURL(bestand);
+  }
+
+  opslaanBtn.onclick = () => {
+    if (!blob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = vak.naam + '.jpg';
+    a.click();
+  };
+});
+</script>
+</body>
+</html>
