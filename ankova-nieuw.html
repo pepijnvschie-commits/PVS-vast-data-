@@ -200,8 +200,8 @@ body.ready .entrance .hero-meta{opacity:1;transform:none;transition-delay:.6s;}
 body.ready .entrance-card{opacity:1;transform:none;}
 
 /* onderste strip in de hero: fotokiezer links, status rechts */
-.hero-foot{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;max-width:1180px;margin:0 auto;padding:34px 26px 24px;}
-.hero-switch{display:flex;flex-direction:column;gap:8px;text-align:left;}
+.hero-foot{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;align-items:flex-end;justify-content:flex-end;gap:24px;flex-wrap:wrap;max-width:1180px;margin:0 auto;padding:34px 26px 24px;}
+.hero-switch{display:none;}
 .hero-switch button{position:relative;display:flex;align-items:baseline;gap:10px;background:none;color:#fff;font-family:var(--body);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;opacity:.55;padding:2px 0;transition:opacity .2s var(--ease),transform .2s var(--ease);}
 .hero-switch button:hover{opacity:.8;transform:translateX(4px);}
 .hero-switch button.on{opacity:1;}
@@ -581,7 +581,7 @@ footer a:hover{color:var(--brass);}
         <div class="mini-bars"><i style="height:38%"></i><i style="height:52%"></i><i style="height:47%"></i><i style="height:66%"></i><i style="height:74%"></i><i style="height:88%"></i></div>
         <div class="f-kpi"><span class="count" data-count="6.1" data-dec="1">0,0</span>%<small>netto rendement portefeuille</small></div>
       </div>
-      <div class="feature f-4 reveal"><div class="f-ico" style="background:var(--brass-soft)">🧾</div><h3>Boekhouding &amp; belasting</h3><p>Koppel Exact Online, Moneybird of e-Boekhouden. Uw jaaroverzicht wordt automatisch bijgewerkt, met een schatting van uw fiscale positie — geen vervanging voor uw officiële aangifte of accountant.</p></div>
+      <div class="feature f-4 reveal"><div class="f-ico" style="background:var(--brass-soft)">🧾</div><h3>Boekhouding &amp; belasting</h3><p>Koppel uw boekhoudprogramma. Uw jaaroverzicht wordt automatisch bijgewerkt, met een schatting van uw fiscale positie — geen vervanging voor uw officiële aangifte of accountant.</p></div>
       <div class="feature f-4 reveal"><div class="f-ico" style="background:#E9E0F0">📁</div><h3>Documenten per pand</h3><p>Contracten, facturen, vergunningen en foto's — automatisch geordend per pand en relatie.</p></div>
       <div class="feature f-6 reveal"><div class="f-ico" style="background:#E3ECF6">📅</div><h3>Agenda &amp; mail met AI</h3><p>Afspraken uit e-mails komen automatisch in de agenda, de AI stelt antwoorden op, elk teamlid koppelt veilig zijn eigen mailbox.</p></div>
       <div class="feature f-6 reveal"><div class="f-ico" style="background:var(--clay-soft)">🏷️</div><h3>Verkoop &amp; verhuur</h3><p>Koppel uw makelaar — hij zet het pand op de markt en houdt bezichtigingen en biedingen bij. De AI leest dit mee vanuit de mail en zet het automatisch in uw agenda en het verkoop- en verhuuroverzicht.</p></div>
@@ -622,16 +622,14 @@ footer a:hover{color:var(--brass);}
   <div class="container">
     <div class="reveal">
       <div class="sec-eyebrow"><span class="sec-nr">03</span>Koppelingen</div>
-      <h2 class="sec-title">Werkt samen met wat u al gebruikt.</h2>
-      <p class="sec-sub">Geen overstap, geen dubbel werk — Ankova sluit aan op de systemen die al draaien.</p>
+      <h2 class="sec-title">Sluit aan op wat u al gebruikt.</h2>
+      <p class="sec-sub">Geen overstap en geen dubbel werk. Welke aanbieders we precies koppelen stemmen we met u af — vertel ons waarmee u werkt.</p>
     </div>
     <div class="lijst reveal">
-      <div class="lijst-rij"><span class="naam">Exact Online</span><span class="wat">Boekingen en facturen lopen automatisch door</span><span class="merk">Boekhouding</span></div>
-      <div class="lijst-rij"><span class="naam">Moneybird</span><span class="wat">Kosten per pand direct in uw administratie</span><span class="merk">Boekhouding</span></div>
-      <div class="lijst-rij"><span class="naam">e-Boekhouden</span><span class="wat">Jaaroverzicht dat zichzelf bijwerkt</span><span class="merk">Boekhouding</span></div>
-      <div class="lijst-rij"><span class="naam">Mollie</span><span class="wat">iDEAL, creditcard en incasso voor uw abonnement</span><span class="merk">Betalingen</span></div>
-      <div class="lijst-rij"><span class="naam">Bankkoppeling (PSD2)</span><span class="wat">Binnengekomen huur wordt vanzelf afgevinkt</span><span class="merk">Bank</span></div>
-      <div class="lijst-rij"><span class="naam">Gmail &amp; Outlook</span><span class="wat">Afspraken uit mail komen in de agenda, de AI stelt antwoorden op</span><span class="merk">Mail &amp; agenda</span></div>
+      <div class="lijst-rij"><span class="naam">Uw boekhoudprogramma</span><span class="wat">Huur, kosten en facturen per pand lopen door naar uw administratie</span><span class="merk">Boekhouding</span></div>
+      <div class="lijst-rij"><span class="naam">Uw zakelijke bank</span><span class="wat">Binnengekomen huur wordt automatisch afgevinkt bij de juiste huurder</span><span class="merk">Betalingen</span></div>
+      <div class="lijst-rij"><span class="naam">Uw mailbox &amp; agenda</span><span class="wat">Afspraken uit e-mail komen in de agenda, de AI stelt antwoorden voor</span><span class="merk">Communicatie</span></div>
+      <div class="lijst-rij"><span class="naam">Uw documenten</span><span class="wat">Contracten, facturen en foto's automatisch geordend per pand</span><span class="merk">Dossier</span></div>
     </div>
   </div>
 </section>
@@ -740,7 +738,7 @@ footer a:hover{color:var(--brass);}
           <div class="price-feat"><span class="ok">✓</span> Alles uit Start, onbeperkt panden</div>
           <div class="price-feat"><span class="ok">✓</span> AI: meldingen → vakman met prijsindicatie</div>
           <div class="price-feat"><span class="ok">✓</span> AI: betalingsherinneringen, mailconcepten &amp; afspraken uit mail</div>
-          <div class="price-feat"><span class="ok">✓</span> Boekhouding-koppeling (Exact, Moneybird, e-Boekhouden)</div>
+          <div class="price-feat"><span class="ok">✓</span> Koppeling met uw boekhoudprogramma</div>
           <div class="price-feat"><span class="ok">✓</span> Rendement, prognoses &amp; fiscale schatting</div>
           <div class="price-feat"><span class="ok">✓</span> Preventief onderhoud per onderdeel</div>
           <div class="price-feat"><span class="ok">✓</span> Verkoop &amp; verhuur met makelaarkoppeling</div>
@@ -755,7 +753,7 @@ footer a:hover{color:var(--brass);}
           <div class="price-feat"><span class="ok">✓</span> Alles uit Beheer</div>
           <div class="price-feat"><span class="ok">✓</span> Meerdere gebruikers, elk eigen mail &amp; rechten</div>
           <div class="price-feat"><span class="ok">✓</span> Eigen toegang voor aannemers &amp; makelaars</div>
-          <div class="price-feat"><span class="ok">✓</span> Bankkoppeling (PSD2) — directe betaalsignalering</div>
+          <div class="price-feat"><span class="ok">✓</span> Bankkoppeling — huur direct afgevinkt bij ontvangst</div>
           <div class="price-feat"><span class="ok">✓</span> Prioriteitssupport &amp; persoonlijke onboarding</div>
         </div>
         <button class="btn btn-dark" style="width:100%" onclick="openRegisterMetPakket('Bedrijf')">Kies Bedrijf</button>
